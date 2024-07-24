@@ -16,7 +16,7 @@ import HTMLRenderer, {
 } from "react-native-render-html";
 
 export default function ArticlePage() {
-  const { s, content, tagsStyles } = useStyles();
+  const { s, tagsStyles } = useStyles();
   const [article, setArticle] = useState<Article>(null);
   const { article_url } = useLocalSearchParams();
   const { width } = useWindowDimensions();
@@ -36,11 +36,11 @@ export default function ArticlePage() {
 
   if (!article) return <Text>Loading...</Text>;
 
-  console.log(article.content);
   return (
     <>
       <Stack.Screen options={{ title: article.title }} />
       <ScrollView contentContainerStyle={s.container}>
+        <Text style={s.articleTitle}>{article.title}</Text>
         <HTMLRenderer
           tagsStyles={tagsStyles}
           systemFonts={[...defaultSystemFonts, ...appFontNames]}
@@ -57,26 +57,25 @@ export default function ArticlePage() {
 
 function useStyles() {
   const { theme } = useThemeContext();
-  const { colors, fonts, sizes } = theme;
+  const { colors, fonts } = theme;
 
   const styles = StyleSheet.create({
     container: {
       color: colors.text,
       padding: 16,
     },
+    articleTitle: {
+      color: colors.text,
+      fontSize: fonts.fontSizeH1,
+      fontFamily: fonts.fontFamilyBold,
+      marginBottom: fonts.marginH1,
+    }
   });
 
   const content = {
     color: colors.text,
     fontSize: fonts.baseFontSize,
     fontFamily: fonts.fontFamilyRegular,
-  };
-
-  const lists = {
-    fontFamily: fonts.fontFamilyRegular,
-    lineHeight: fonts.lineHeightComfortable,
-    marginTop: 0,
-    marginBottom: fonts.marginP,
   };
 
   const tagsStyles: MixedStyleRecord = {
@@ -88,6 +87,8 @@ function useStyles() {
     },
     p: {
       lineHeight: fonts.lineHeightComfortable,
+      marginTop: 0,
+      marginBottom: fonts.marginP,
     },
     a: {
       color: colors.text,

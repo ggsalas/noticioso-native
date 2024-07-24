@@ -4,6 +4,7 @@ import { Fonts, getFonts } from "./fonts";
 import { Sizes, getSizes } from "./sizes";
 
 export type Theme = {
+  colorScheme: ColorSchemeName;
   fonts: Fonts;
   colors: Colors;
   sizes: Sizes;
@@ -11,8 +12,9 @@ export type Theme = {
 
 export const getTheme = (
   baseFontSize: number,
-  themeColor?: ColorSchemeName
+  themeColor: ColorSchemeName = 'light'
 ) => ({
+  colorScheme: themeColor,
   fonts: getFonts(baseFontSize),
   colors: getColors(themeColor),
   sizes: getSizes(baseFontSize),

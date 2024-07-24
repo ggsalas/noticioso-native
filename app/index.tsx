@@ -19,6 +19,7 @@ export default function Index() {
 
       <View style={s.hero}>
         <Text style={s.heroText}>Configure font size</Text>
+        <Text style={s.testText}>This is a example of text, to adjust the height as you need</Text>
 
         <Pressable
           style={s.button}
@@ -45,23 +46,29 @@ function useStyles() {
     main: {
       display: "flex",
       flexDirection: "column",
-      gap: sizes.s1_5,
+      justifyContent: "flex-start",
+      gap: sizes.s1,
+      padding: sizes.s1,
       backgroundColor: colors.background,
     },
     hero: {
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      gap: sizes.s1_5,
+      gap: sizes.s1,
       borderColor: colors.borderDark,
       borderRadius: sizes.s0_50,
       borderWidth: 1,
-      margin: sizes.s1_5,
       padding: sizes.s2,
     },
     heroText: {
       color: colors.text,
       fontSize: fonts.fontSizeH1,
+      fontFamily: fonts.fontFamilyBold,
+    },
+    testText: {
+      color: colors.text,
+      fontSize: fonts.fontSizeP,
       fontFamily: fonts.fontFamilyRegular
     },
     button: {
