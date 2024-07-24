@@ -1,11 +1,13 @@
 import { Link, Stack } from "expo-router";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { Text, StyleSheet, ScrollView } from "react-native";
 import { getFeeds } from "../../domain/getFeeds";
 import { useEffect, useState } from "react";
 import { Feed } from "@/types";
+import { useThemeContext } from "@/theme/ThemeProvider";
 
 export default function Feeds() {
   const [feeds, setFeeds] = useState<Feed[]>();
+  const s = useStyles();
 
   useEffect(() => {
     async function fn() {
@@ -23,10 +25,10 @@ export default function Feeds() {
   return (
     <>
       <Stack.Screen options={{ title: "Feeds" }} />
-      <ScrollView style={styles.list}>
+      <ScrollView style={s.list}>
         {feeds.map(({ url, name }) => (
           <Link
-            style={styles.item}
+            style={s.item}
             key={name}
             href={`/feeds/${encodeURIComponent(url)}`}
           >
@@ -38,19 +40,29 @@ export default function Feeds() {
   );
 }
 
-const styles = StyleSheet.create({
-  list: {
-    gap: 40,
-    display: "flex",
-    flexDirection: "column",
-  },
-  item: {
-    borderBottomWidth: 1,
-    borderBottomColor: "black",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    gap: 10,
-    display: "flex",
-    flexDirection: "column",
-  },
-});
+function useStyles() {
+  const { theme } = useThemeContext();
+  const { colors, sizes, fonts } = theme;
+
+  const styles = StyleSheet.create({
+    list: {
+      gap: sizes.s2,
+      display: "flex",
+      flexDirection: "column",
+    },
+    item: {
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderDark,
+      color: colors.text,
+      fontSize: fonts.fontSizeH3,
+      fontFamily: fonts.fontFamilyRegular,
+      paddingHorizontal: sizes.s2,
+      paddingVertical: sizes.s1,
+      gap: sizes.s1,
+      display: "flex",
+      flexDirection: "column",
+    },
+  });
+
+  return styles;
+}

@@ -1,12 +1,14 @@
 import { getFeedContent } from "@/domain/getFeedContent";
+import { useThemeContext } from "@/theme/ThemeProvider";
 import { FeedContent } from "@/types";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, ScrollView, StyleSheet, Pressable } from "react-native";
 
 export default function FeedPage() {
+  const s = useStyles();
   const [content, setContent] = useState<FeedContent | null>(null);
-  const [feedTitle, setFeedTitle] = useState<string>('Feed no title');
+  const [feedTitle, setFeedTitle] = useState<string>("Feed no title");
   const { feed_url } = useLocalSearchParams();
 
   useEffect(() => {
@@ -15,9 +17,8 @@ export default function FeedPage() {
       const feedContent = data?.rss?.channel?.item;
       if (feedContent) {
         setContent(feedContent);
-        setFeedTitle(data?.rss?.channel.title)
+        setFeedTitle(data?.rss?.channel.title);
       }
-
     }
 
     fn();
@@ -30,7 +31,7 @@ export default function FeedPage() {
   return (
     <>
       <Stack.Screen options={{ title: feedTitle }} />
-      <ScrollView style={styles.list}>
+      <ScrollView style={s.list}>
         {content.map(({ title, guid, link, description, author }: any) => (
           <Link
             href={`/feeds/${encodeURIComponent(
@@ -39,10 +40,10 @@ export default function FeedPage() {
             key={guid}
             asChild
           >
-            <Pressable style={styles.item}>
-              <Text style={styles.title}>{title}</Text>
-              <Text>{author}</Text>
-              <Text>{description}</Text>
+            <Pressable style={s.item}>
+              <Text style={s.title}>{title}</Text>
+              {author && <Text style={s.author}>{author}</Text>}
+              <Text style={s.description}>{description}</Text>
             </Pressable>
           </Link>
         ))}
@@ -51,16 +52,39 @@ export default function FeedPage() {
   );
 }
 
-const styles = StyleSheet.create({
-  list: {},
-  item: {
-    borderBottomWidth: 1,
-    borderBottomColor: "black",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    flexDirection: "column",
-  },
-  title: {
-    fontWeight: "bold",
-  },
-});
+function useStyles() {
+  const { theme } = useThemeContext();
+  const { colors, fonts, sizes } = theme
+
+  const styles = StyleSheet.create({
+    list: {},
+    item: {
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderDark,
+      paddingHorizontal: sizes.s1,
+      paddingVertical: sizes.s1,
+      flexDirection: "column",
+    },
+    title: {
+      color: colors.text,
+      fontFamily: fonts.fontFamilyBold,
+      fontSize: fonts.fontSizeH2,
+      lineHeight: fonts.lineHeightSmall
+    },
+    author: {
+      color: theme.colors.text,
+      fontFamily: fonts.fontFamilyItalic,
+      fontSize: fonts.fontSizeP,
+      lineHeight: fonts.lineHeightComfortable,
+      marginBottom: fonts.marginP,
+    },
+    description: {
+      color: colors.text,
+      fontFamily: fonts.fontFamilyRegular,
+      fontSize: fonts.fontSizeP,
+      lineHeight: fonts.lineHeightComfortable,
+    }
+  });
+
+  return styles;
+}
