@@ -4,6 +4,7 @@ import { getFeeds } from "../../domain/getFeeds";
 import { useEffect, useState } from "react";
 import { Feed } from "@/types";
 import { useThemeContext } from "@/theme/ThemeProvider";
+import { PagedNavigation } from "@/components/PagedNavigation";
 
 export default function Feeds() {
   const [feeds, setFeeds] = useState<Feed[]>();
@@ -25,7 +26,7 @@ export default function Feeds() {
   return (
     <>
       <Stack.Screen options={{ title: "Feeds" }} />
-      <ScrollView style={s.list}>
+      <PagedNavigation>
         {feeds.map(({ url, name }) => (
           <Link
             style={s.item}
@@ -35,7 +36,7 @@ export default function Feeds() {
             {name}
           </Link>
         ))}
-      </ScrollView>
+      </PagedNavigation>
     </>
   );
 }
@@ -45,11 +46,6 @@ function useStyles() {
   const { colors, sizes, fonts } = theme;
 
   const styles = StyleSheet.create({
-    list: {
-      gap: sizes.s2,
-      display: "flex",
-      flexDirection: "column",
-    },
     item: {
       borderBottomWidth: 1,
       borderBottomColor: colors.borderDark,

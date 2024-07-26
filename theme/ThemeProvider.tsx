@@ -38,7 +38,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         const storedData = await AsyncStorage.getItem(
           "@noticioso-baseFontSize"
         );
-        const baseFontSizeStorage = Number(storedData);
+        const baseFontSizeStorage = storedData ? Number(storedData) : DEFAULT_FONT_SIZE;
 
         // Storage replace current state
         if (baseFontSizeStorage !== theme.fonts.baseFontSize) {

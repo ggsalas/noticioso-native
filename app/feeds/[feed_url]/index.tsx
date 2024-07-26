@@ -1,3 +1,4 @@
+import { PagedNavigation } from "@/components/PagedNavigation";
 import { getFeedContent } from "@/domain/getFeedContent";
 import { useThemeContext } from "@/theme/ThemeProvider";
 import { FeedContent } from "@/types";
@@ -31,7 +32,9 @@ export default function FeedPage() {
   return (
     <>
       <Stack.Screen options={{ title: feedTitle }} />
-      <ScrollView style={s.list}>
+      <PagedNavigation withPadding="fromRenderProp">
+        {({ padding }) => (
+          <>
         {content.map(({ title, guid, link, description, author }: any) => (
           <Link
             href={`/feeds/${encodeURIComponent(
@@ -40,14 +43,16 @@ export default function FeedPage() {
             key={guid}
             asChild
           >
-            <Pressable style={s.item}>
+            <Pressable style={{...s.item, paddingHorizontal: padding}}>
               <Text style={s.title}>{title}</Text>
               {author && <Text style={s.author}>{author}</Text>}
               <Text style={s.description}>{description}</Text>
             </Pressable>
           </Link>
         ))}
-      </ScrollView>
+        </>
+        )}
+      </PagedNavigation>
     </>
   );
 }
@@ -57,11 +62,9 @@ function useStyles() {
   const { colors, fonts, sizes } = theme
 
   const styles = StyleSheet.create({
-    list: {},
     item: {
       borderBottomWidth: 1,
       borderBottomColor: colors.borderDark,
-      paddingHorizontal: sizes.s1,
       paddingVertical: sizes.s1,
       flexDirection: "column",
     },

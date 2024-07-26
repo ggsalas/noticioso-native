@@ -14,12 +14,13 @@ import HTMLRenderer, {
   MixedStyleRecord,
   defaultSystemFonts,
 } from "react-native-render-html";
+import { PagedNavigation } from "@/components/PagedNavigation";
 
 export default function ArticlePage() {
   const { s, tagsStyles } = useStyles();
+  const { width } = useWindowDimensions();
   const [article, setArticle] = useState<Article>(null);
   const { article_url } = useLocalSearchParams();
-  const { width } = useWindowDimensions();
 
   useEffect(() => {
     async function fn() {
@@ -39,18 +40,22 @@ export default function ArticlePage() {
   return (
     <>
       <Stack.Screen options={{ title: article.title }} />
-      <ScrollView contentContainerStyle={s.container}>
-        <Text style={s.articleTitle}>{article.title}</Text>
-        <HTMLRenderer
-          tagsStyles={tagsStyles}
-          systemFonts={[...defaultSystemFonts, ...appFontNames]}
-          source={{ html: article.content }}
-          contentWidth={width - s.container.padding * 2}
-          ignoredDomTags={["source", "iframe", "video"]} // TODO: support iframe, video
-          enableCSSInlineProcessing={false}
-          ignoredStyles={["fontFamily"]}
-        />
-      </ScrollView>
+      <PagedNavigation withPadding="fromContainer">
+        {({ padding }) => (
+          <>
+            <Text style={s.articleTitle}>{article.title}</Text>
+            <HTMLRenderer
+              tagsStyles={tagsStyles}
+              systemFonts={[...defaultSystemFonts, ...appFontNames]}
+              source={{ html: article.content }}
+              contentWidth={width - padding * 2}
+              ignoredDomTags={["source", "iframe", "video"]} // TODO: support iframe, video
+              enableCSSInlineProcessing={false}
+              ignoredStyles={["fontFamily"]}
+            />
+          </>
+        )}
+      </PagedNavigation>
     </>
   );
 }
@@ -60,16 +65,13 @@ function useStyles() {
   const { colors, fonts } = theme;
 
   const styles = StyleSheet.create({
-    container: {
-      color: colors.text,
-      padding: 16,
-    },
     articleTitle: {
       color: colors.text,
       fontSize: fonts.fontSizeH1,
       fontFamily: fonts.fontFamilyBold,
       marginBottom: fonts.marginH1,
-    }
+      marginTop: fonts.marginP,
+    },
   });
 
   const content = {
@@ -114,33 +116,36 @@ function useStyles() {
     h1: {
       fontFamily: fonts.fontFamilyRegular,
       fontWeight: "400",
-      fontSize: fonts.fontSizeH1
+      fontSize: fonts.fontSizeH1,
     },
     h2: {
       fontFamily: fonts.fontFamilyRegular,
       fontWeight: "400",
-      fontSize: fonts.fontSizeH2
+      fontSize: fonts.fontSizeH2,
     },
     h3: {
       fontFamily: fonts.fontFamilyRegular,
       fontWeight: "400",
-      fontSize: fonts.fontSizeH3
+      fontSize: fonts.fontSizeH3,
     },
     h4: {
       fontFamily: fonts.fontFamilyRegular,
       fontWeight: "400",
-      fontSize: fonts.fontSizeH4
+      fontSize: fonts.fontSizeH4,
     },
     h5: {
       fontFamily: fonts.fontFamilyRegular,
       fontWeight: "400",
-      fontSize: fonts.fontSizeH5
+      fontSize: fonts.fontSizeH5,
     },
-    code: {
+    pre: {
       fontFamily: fonts.fontFamilyCodeRegular,
       fontSize: fonts.fontSizeCode,
       lineHeight: fonts.lineHeightCode,
-    }
+    },
+    code: {
+      fontSize: fonts.fontSizeCode,
+    },
   };
 
   return { s: styles, content, tagsStyles };
