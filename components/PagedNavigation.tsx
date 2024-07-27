@@ -1,5 +1,5 @@
 import { useThemeContext } from "@/theme/ThemeProvider";
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useRef } from "react";
 import {
   ScrollView,
   View,
@@ -54,9 +54,10 @@ export function PagedNavigation({
       // Scroll Down
       if (endY < startY.current) {
         return containerContentOffset.current?.y + containerSize.current.height;
+      }
 
-        // Scroll Up
-      } else if (endY > startY.current) {
+      // Scroll Up
+      if (endY > startY.current) {
         return containerContentOffset.current?.y - containerSize.current.height;
       }
     };
