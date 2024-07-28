@@ -1,16 +1,16 @@
 import { useThemeContext } from "@/theme/ThemeProvider";
-import { ReactNode, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import {
   ScrollView,
   View,
   StyleSheet,
-  GestureResponderEvent,
   NativeScrollEvent,
   NativeSyntheticEvent,
   NativeScrollPoint,
   LayoutChangeEvent,
   LayoutRectangle,
 } from "react-native";
+import { PercentageBar } from "./PercentageBar";
 
 type WithPadding = "fromContainer" | "fromRenderProp";
 type PagedNavigationProps = {
@@ -24,64 +24,71 @@ export function PagedNavigation({
 }: PagedNavigationProps) {
   const { styles, padding } = useStyles(withPadding);
   const containerRef = useRef<ScrollView>(null);
-  const startY = useRef(0);
-  const containerSize = useRef<LayoutRectangle>({
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  });
-  const containerContentOffset = useRef<NativeScrollPoint>({ x: 0, y: 0 });
+  const containerSize = useRef<LayoutRectangle | undefined>(undefined);
+  const [containerContentOffset, setContainerContentOffset] =
+    useState<NativeScrollPoint>();
+  const [contentSize, setContentSize] = useState<LayoutRectangle | undefined>();
+
+  // To allow scroll a complete last page
+  const [extraWhitespace, setExtraWhitespace] = useState(0);
+  const hasAddedWhitespace = useRef(false);
+
+  useEffect(() => {
+    if (
+      !hasAddedWhitespace.current &&
+      containerSize.current &&
+      contentSize?.height
+    ) {
+      const whitespace = containerSize.current.height - (contentSize.height % containerSize.current.height)
+      setExtraWhitespace(Math.round(whitespace));
+      hasAddedWhitespace.current = true;
+    }
+  }, [contentSize?.height]);
 
   const handleLayout = (event: LayoutChangeEvent) => {
+    hasAddedWhitespace.current = false;
     containerSize.current = event.nativeEvent.layout;
   };
 
+  const onContentLayout = (event: LayoutChangeEvent) => {
+    setContentSize(event.nativeEvent.layout);
+  };
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    containerContentOffset.current = event.nativeEvent.contentOffset;
+    setContainerContentOffset(event.nativeEvent.contentOffset);
   };
 
-  const handleOnTouchStart = (event: GestureResponderEvent) => {
-    startY.current = event.nativeEvent.pageY;
-  };
+  // const overlapSize = containerSize.current?.height
+  //   ? containerSize.current?.height - fonts.lineHeightComfortable / 2
+  //   : undefined;
 
-  const handleOnTouchEnd = (event: GestureResponderEvent) => {
-    const endY = event.nativeEvent.pageY;
-
-    const getY = () => {
-      if (!containerSize.current || !containerContentOffset?.current) return 0;
-
-      // Scroll Down
-      if (endY < startY.current) {
-        return containerContentOffset.current?.y + containerSize.current.height;
-      }
-
-      // Scroll Up
-      if (endY > startY.current) {
-        return containerContentOffset.current?.y - containerSize.current.height;
-      }
-    };
-
-    containerRef.current?.scrollTo({
-      y: getY(),
-      animated: true,
-    });
-  };
+  const readPercentage =
+    containerContentOffset && containerSize.current && contentSize
+      ? Math.round(
+        ((containerContentOffset.y + containerSize.current.height) /
+          contentSize.height) *
+        100
+      )
+      : 0;
 
   return (
-    <ScrollView
-      ref={containerRef}
-      style={styles.container}
-      onScroll={handleScroll}
-      onTouchStart={handleOnTouchStart}
-      onTouchEnd={handleOnTouchEnd}
-      onLayout={handleLayout}
-      scrollEnabled={false}
-    >
-      <View style={styles.content}>
-        {typeof children === "function" ? children({ padding }) : children}
-      </View>
-    </ScrollView>
+    <View>
+      <PercentageBar percentage={readPercentage} />
+      <ScrollView
+        ref={containerRef}
+        style={styles.container}
+        onScroll={handleScroll}
+        onLayout={handleLayout}
+        scrollEnabled={true}
+        pagingEnabled={true}
+        // snapToInterval={overlapSize}
+      >
+        <View style={styles.content} onLayout={onContentLayout}>
+          {typeof children === "function" ? children({ padding }) : children}
+          <View style={{ height: extraWhitespace }} />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -108,5 +115,5 @@ function useStyles(withPadding?: WithPadding) {
     },
   });
 
-  return { styles, padding };
+  return { styles, padding, fonts };
 }
