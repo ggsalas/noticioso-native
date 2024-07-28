@@ -22,7 +22,7 @@ export function PagedNavigation({
   children,
   withPadding,
 }: PagedNavigationProps) {
-  const { styles, padding } = useStyles(withPadding);
+  const { styles, padding, fonts } = useStyles(withPadding);
   const containerRef = useRef<ScrollView>(null);
   const containerSize = useRef<LayoutRectangle | undefined>(undefined);
   const [containerContentOffset, setContainerContentOffset] =
@@ -33,17 +33,22 @@ export function PagedNavigation({
   const [extraWhitespace, setExtraWhitespace] = useState(0);
   const hasAddedWhitespace = useRef(false);
 
+  const intervalSize = containerSize.current?.height
+    ? containerSize.current?.height - fonts.lineHeightComfortable / 2
+    : undefined;
+
   useEffect(() => {
     if (
       !hasAddedWhitespace.current &&
-      containerSize.current &&
-      contentSize?.height
+      contentSize?.height && 
+      intervalSize
     ) {
-      const whitespace = containerSize.current.height - (contentSize.height % containerSize.current.height)
+      const whitespace = intervalSize - (contentSize.height % intervalSize)
       setExtraWhitespace(Math.round(whitespace));
+      console.log('setExtraWhitespace')
       hasAddedWhitespace.current = true;
     }
-  }, [contentSize?.height]);
+  }, [contentSize?.height, intervalSize]);
 
   const handleLayout = (event: LayoutChangeEvent) => {
     hasAddedWhitespace.current = false;
@@ -58,15 +63,10 @@ export function PagedNavigation({
     setContainerContentOffset(event.nativeEvent.contentOffset);
   };
 
-  // const overlapSize = containerSize.current?.height
-  //   ? containerSize.current?.height - fonts.lineHeightComfortable / 2
-  //   : undefined;
-
   const readPercentage =
-    containerContentOffset && containerSize.current && contentSize
+    containerContentOffset && intervalSize && contentSize
       ? Math.round(
-        ((containerContentOffset.y + containerSize.current.height) /
-          contentSize.height) *
+        ((containerContentOffset.y + intervalSize) / contentSize.height) *
         100
       )
       : 0;
@@ -81,7 +81,8 @@ export function PagedNavigation({
         onLayout={handleLayout}
         scrollEnabled={true}
         pagingEnabled={true}
-        // snapToInterval={overlapSize}
+        snapToInterval={intervalSize}
+        decelerationRate="fast"
       >
         <View style={styles.content} onLayout={onContentLayout}>
           {typeof children === "function" ? children({ padding }) : children}
