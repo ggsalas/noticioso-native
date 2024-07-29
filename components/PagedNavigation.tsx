@@ -29,26 +29,17 @@ export function PagedNavigation({
     useState<NativeScrollPoint>();
   const [contentSize, setContentSize] = useState<LayoutRectangle | undefined>();
 
-  // To allow scroll a complete last page
-  const [extraWhitespace, setExtraWhitespace] = useState(0);
-  const hasAddedWhitespace = useRef(false);
-
   const intervalSize = containerSize.current?.height
     ? containerSize.current?.height - fonts.lineHeightComfortable / 2
     : undefined;
 
-  useEffect(() => {
-    if (
-      !hasAddedWhitespace.current &&
-      contentSize?.height && 
-      intervalSize
-    ) {
-      const whitespace = intervalSize - (contentSize.height % intervalSize)
-      setExtraWhitespace(Math.round(whitespace));
-      console.log('setExtraWhitespace')
-      hasAddedWhitespace.current = true;
-    }
-  }, [contentSize?.height, intervalSize]);
+  const pageNumber =
+    containerContentOffset && intervalSize
+      ? Math.round(containerContentOffset?.y / intervalSize)
+      : 0;
+
+  const { extraWhitespace, hasAddedWhitespace } =
+    useAddExtraWhitespaceOnLastPage({ contentSize, intervalSize });
 
   const handleLayout = (event: LayoutChangeEvent) => {
     hasAddedWhitespace.current = false;
@@ -63,11 +54,27 @@ export function PagedNavigation({
     setContainerContentOffset(event.nativeEvent.contentOffset);
   };
 
+  // The scroll is handled by a swipe
+  // if is a slow pan, do nothing. (pagingEnabled will restore to original position)
+  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (!intervalSize || !event.nativeEvent.velocity) return;
+
+    const speed = event.nativeEvent.velocity.y;
+
+    if (Math.abs(speed) < 0.6) return;
+
+    const newPage = speed < 0 ? pageNumber + 1 : pageNumber - 1;
+
+    containerRef.current?.scrollTo({
+      y: newPage * intervalSize,
+      animated: false,
+    });
+  };
+
   const readPercentage =
     containerContentOffset && intervalSize && contentSize
       ? Math.round(
-        ((containerContentOffset.y + intervalSize) / contentSize.height) *
-        100
+        ((containerContentOffset.y + intervalSize) / contentSize.height) * 100
       )
       : 0;
 
@@ -79,9 +86,10 @@ export function PagedNavigation({
         style={styles.container}
         onScroll={handleScroll}
         onLayout={handleLayout}
-        scrollEnabled={true}
-        pagingEnabled={true}
+        onScrollEndDrag={handleScrollEnd}
+        scrollEventThrottle={1}
         snapToInterval={intervalSize}
+        pagingEnabled={false}
         decelerationRate="fast"
       >
         <View style={styles.content} onLayout={onContentLayout}>
@@ -117,4 +125,21 @@ function useStyles(withPadding?: WithPadding) {
   });
 
   return { styles, padding, fonts };
+}
+
+
+// To allow scroll a complete last page
+function useAddExtraWhitespaceOnLastPage({ contentSize, intervalSize }: any) {
+  const [extraWhitespace, setExtraWhitespace] = useState(0);
+  const hasAddedWhitespace = useRef(false);
+
+  useEffect(() => {
+    if (!hasAddedWhitespace.current && contentSize?.height && intervalSize) {
+      const whitespace = intervalSize - (contentSize.height % intervalSize);
+      setExtraWhitespace(Math.round(whitespace));
+      hasAddedWhitespace.current = true;
+    }
+  }, [contentSize?.height, intervalSize]);
+
+  return { extraWhitespace, hasAddedWhitespace };
 }
