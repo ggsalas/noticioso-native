@@ -1,11 +1,8 @@
 import { getArticle } from "@/domain/getArticle";
 import { useThemeContext } from "@/theme/ThemeProvider";
 import { appFontNames } from "@/theme/fonts";
-import { Article } from "@/types";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
 import {
-  ScrollView,
   Text,
   StyleSheet,
   useWindowDimensions,
@@ -15,25 +12,19 @@ import HTMLRenderer, {
   defaultSystemFonts,
 } from "react-native-render-html";
 import { PagedNavigation } from "@/components/PagedNavigation";
+import { useAsyncFn } from "@/hooks/useFetch";
 
 export default function ArticlePage() {
   const { s, tagsStyles } = useStyles();
   const { width } = useWindowDimensions();
-  const [article, setArticle] = useState<Article>(null);
   const { article_url } = useLocalSearchParams();
 
-  useEffect(() => {
-    async function fn() {
-      if (!article_url) throw new Error("missing article_url on article page");
+  const { data: article, loading, error } = useAsyncFn(getArticle, article_url);
 
-      const data = await getArticle(article_url as string);
-      if (data) {
-        setArticle(data);
-      }
-    }
+  if (loading) return <Text>Loading...</Text>;
 
-    fn();
-  }, []);
+  if ((!loading && !article) || error)
+    return <Text>The app has failed to get article content</Text>;
 
   if (!article) return <Text>Loading...</Text>;
 

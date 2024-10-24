@@ -6,10 +6,7 @@ import type { FeedData, Item } from "~/types";
 export async function getFeedContent(url: string): Promise<FeedData> {
   try {
     const feed = await getFeedByUrl(url);
-    const res = await fetch(url, {
-      method: "GET",
-      redirect: "follow",
-    });
+    const res = await fetch(url, { method: "GET" });
 
     if (!res.ok) {
       throw new Error(`Error on get feeds: ${res}`);
