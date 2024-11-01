@@ -2,17 +2,14 @@ import { getArticle } from "@/domain/getArticle";
 import { useThemeContext } from "@/theme/ThemeProvider";
 import { appFontNames } from "@/theme/fonts";
 import { Stack, useLocalSearchParams } from "expo-router";
-import {
-  Text,
-  StyleSheet,
-  useWindowDimensions,
-} from "react-native";
+import { Text, StyleSheet, useWindowDimensions } from "react-native";
 import HTMLRenderer, {
   MixedStyleRecord,
   defaultSystemFonts,
 } from "react-native-render-html";
 import { PagedNavigation } from "@/components/PagedNavigation";
 import { useAsyncFn } from "@/hooks/useFetch";
+import { HTMLPagesNav } from "@/components/HTMLPagesNav";
 
 export default function ArticlePage() {
   const { s, tagsStyles } = useStyles();
@@ -31,22 +28,7 @@ export default function ArticlePage() {
   return (
     <>
       <Stack.Screen options={{ title: article.title }} />
-      <PagedNavigation withPadding="fromContainer">
-        {({ padding }) => (
-          <>
-            <Text style={s.articleTitle}>{article.title}</Text>
-            <HTMLRenderer
-              tagsStyles={tagsStyles}
-              systemFonts={[...defaultSystemFonts, ...appFontNames]}
-              source={{ html: article.content }}
-              contentWidth={width - padding * 2}
-              ignoredDomTags={["source", "iframe", "video"]} // TODO: support iframe, video
-              enableCSSInlineProcessing={false}
-              ignoredStyles={["fontFamily"]}
-            />
-          </>
-        )}
-      </PagedNavigation>
+      <HTMLPagesNav html={article.content} />
     </>
   );
 }

@@ -19,7 +19,9 @@ export default function Index() {
 
       <View style={s.hero}>
         <Text style={s.heroText}>Configure font size</Text>
-        <Text style={s.testText}>This is a example of text, to adjust the height as you need</Text>
+        <Text style={s.testText}>
+          This is a example of text, to adjust the height as you need
+        </Text>
 
         <Pressable
           style={s.button}
@@ -40,7 +42,7 @@ export default function Index() {
 
 function useStyles() {
   const { theme, changeFontSize } = useThemeContext();
-  const { colors, fonts, sizes } = theme
+  const { colors, fonts, sizes } = theme;
 
   const style = StyleSheet.create({
     main: {
@@ -69,7 +71,7 @@ function useStyles() {
     testText: {
       color: colors.text,
       fontSize: fonts.fontSizeP,
-      fontFamily: fonts.fontFamilyRegular
+      fontFamily: fonts.fontFamilyRegular,
     },
     button: {
       backgroundColor: colors.text,
@@ -82,5 +84,5 @@ function useStyles() {
     },
   });
 
-  return { s: style, changeFontSize }
+  return { s: style, changeFontSize };
 }

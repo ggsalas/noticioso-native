@@ -12,6 +12,7 @@ export type Colors = {
   tabIconSelected: string;
   borderDark: string;
   backgroundDark: string;
+  backgroundLight: string;
   backgroundDark_text: string;
 };
 
@@ -25,6 +26,7 @@ const colors = {
     tabIconSelected: tintColorLight,
     borderDark: "#000000",
     backgroundDark: "#000000",
+    backgroundLight: "#fafafa",
     backgroundDark_text: "#ffffff",
   },
   dark: {
@@ -36,6 +38,7 @@ const colors = {
     tabIconSelected: tintColorDark,
     borderDark: "#ffffff",
     backgroundDark: "#ffffff",
+    backgroundLight: "#111111",
     backgroundDark_text: "#000000",
   },
 };
