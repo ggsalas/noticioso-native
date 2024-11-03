@@ -126,6 +126,13 @@ function useStyles(windowWidth: number) {
   const { theme } = useThemeContext();
   const { sizes, colors } = theme;
 
+  const webViewWidth = () => {
+    const screenWidth = windowWidth - sizes.s1 * 2;
+    const maxWidth = sizes.s1 * 30;
+
+    return Math.min(screenWidth, maxWidth);
+  };
+
   const styles = StyleSheet.create({
     container: {
       backgroundColor: colors.backgroundLight,
@@ -137,9 +144,11 @@ function useStyles(windowWidth: number) {
       overflow: "hidden",
       backgroundColor: colors.background,
       elevation: 1,
+      flexDirection: "column",
+      alignItems: "center",
     },
     webView: {
-      width: windowWidth - sizes.s1 * 2,
+      width: webViewWidth(),
       margin: sizes.s1,
       overflow: "hidden",
       backgroundColor: "transparent",
