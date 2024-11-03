@@ -1,5 +1,6 @@
 import { Readability } from "@mozilla/readability";
 import type { getFeedContent } from "../domain/getFeedContent";
+import { NativeSyntheticEvent } from "react-native";
 
 type ReadabilityArticle = ReturnType<Readability["parse"]>;
 
@@ -53,3 +54,23 @@ export type FeedData = {
   };
 };
 
+// UI
+
+export type Pages = {
+  amount: number;
+  current: number;
+  isFirst: Boolean;
+  isLast: Boolean;
+};
+
+export type HTMLPagesNavActionItem = {
+  label: string;
+  action: () => void;
+};
+
+export type HTMLPagesNavActions = {
+  top?: HTMLPagesNavActionItem;
+  bottom?: HTMLPagesNavActionItem;
+  first: HTMLPagesNavActionItem;
+  last: HTMLPagesNavActionItem;
+};

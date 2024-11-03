@@ -1,25 +1,42 @@
 import { useThemeContext } from "@/theme/ThemeProvider";
+import { Pages } from "@/types";
 import { StyleSheet, View, Text, Pressable } from "react-native";
 
-export function HTMLPageNavLabels() {
+type HTMLPageNavLabelsProps = {
+  topLabel?: string;
+  bottomLabel?: string;
+  leftLabel: string | null;
+  rightLabel: string | null;
+};
+
+export function Labels({
+  topLabel,
+  bottomLabel,
+  leftLabel = "Previous Page",
+  rightLabel = "Next Page",
+}: HTMLPageNavLabelsProps) {
   const { styles } = useStyles();
 
   return (
     <View style={styles.labels}>
-      <View style={styles.top}>
-        <Text style={styles.text}>Go to Article List</Text>
-      </View>
+      {topLabel && (
+        <View style={styles.top}>
+          <Text style={styles.text}>{topLabel}</Text>
+        </View>
+      )}
       <View style={styles.center}>
-        <View style={styles.back}>
-          <Text style={styles.text}>Go to previous page</Text>
+        <View style={styles.left}>
+          <Text style={styles.text}>{leftLabel}</Text>
         </View>
-        <View style={styles.forward}>
-          <Text style={styles.text}>Go to next page</Text>
+        <View style={styles.right}>
+          <Text style={styles.text}>{rightLabel}</Text>
         </View>
       </View>
-      <View style={styles.bottom}>
-        <Text style={styles.text}>Go to Next Article</Text>
-      </View>
+      {bottomLabel && (
+        <View style={styles.bottom}>
+          <Text style={styles.text}>{bottomLabel}</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -58,20 +75,20 @@ function useStyles() {
     },
     center: {
       width: "100%",
-      height: "40%",
+      flexGrow: 1,
       display: "flex",
       flexDirection: "row",
       justifyContent: "space-around",
       alignItems: "stretch",
     },
-    back: {
+    left: {
       width: "100%",
       flex: 1,
       flexDirection: "row",
       justifyContent: "flex-start",
       alignItems: "center",
     },
-    forward: {
+    right: {
       width: "100%",
       flex: 1,
       flexDirection: "row",
