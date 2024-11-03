@@ -1,30 +1,61 @@
-import { RefObject, useRef } from "react";
+import { RefObject, useRef, useState } from "react";
 import { Animated, PanResponder } from "react-native";
 import WebView from "react-native-webview";
 
 type UseAnimationsParams = {
   width: number;
+  height: number;
   webviewRef: RefObject<WebView>;
 };
 
-export function usePanResponder({ width, webviewRef }: UseAnimationsParams) {
-  const pan = useRef(new Animated.Value(0)).current;
+type Direction = "HORIZONTAL" | "VERTICAL" | null;
+
+export function usePanResponder({
+  width,
+  height,
+  webviewRef,
+}: UseAnimationsParams) {
+  const pan = useRef(new Animated.ValueXY()).current;
   const labelsOpacity = useRef(new Animated.Value(1)).current;
+  const directionLocked = useRef<Direction>(null);
 
   const panResponder = useRef(
     PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_evt, gestureState) => {
-        return Math.abs(gestureState.dx) > 20; // Activate on horizontal swipe
+        return Math.abs(gestureState.dx) > 20 || Math.abs(gestureState.dy) > 20;
       },
       onPanResponderMove: (_evt, gestureState) => {
-        pan.setValue(gestureState.dx); // Update the position based on swipe
+        const { dx, dy } = gestureState;
+
+        // Lock direction based on initial movement
+        if (directionLocked.current === null) {
+          if (Math.abs(dx) > Math.abs(dy)) {
+            directionLocked.current = "HORIZONTAL";
+            pan.setValue({ x: dx, y: 0 });
+          } else {
+            directionLocked.current = "VERTICAL";
+            pan.setValue({ x: 0, y: dy });
+          }
+        }
+
+        if (directionLocked.current === "HORIZONTAL") {
+          pan.setValue({ x: dx, y: 0 });
+        } else if (directionLocked.current === "VERTICAL") {
+          pan.setValue({ x: 0, y: dy });
+        }
+      },
+      onPanResponderGrant: () => {
+        // Reset position and direction lock when gesture starts
+        pan.setValue({ x: 0, y: 0 });
+        directionLocked.current = null;
       },
       onPanResponderRelease: (_evt, gestureState) => {
-        const activateSize = width / 20;
+        const activateSize = width / 12;
 
         if (
-          gestureState.dx > activateSize ||
-          gestureState.dx < activateSize * -1
+          directionLocked.current === "HORIZONTAL" &&
+          Math.abs(gestureState.dx) > activateSize
         ) {
           const direction =
             gestureState.dx > 0 ? "SWIPE_PREVIOUS" : "SWIPE_NEXT";
@@ -38,7 +69,10 @@ export function usePanResponder({ width, webviewRef }: UseAnimationsParams) {
 
           // Swiped sufficiently left or right
           Animated.timing(pan, {
-            toValue: direction === "SWIPE_PREVIOUS" ? width : -1 * width, // Move off-screen
+            toValue: {
+              x: direction === "SWIPE_PREVIOUS" ? width : -1 * width,
+              y: 0,
+            }, // Move off-screen
             delay: 0,
             duration: 90,
             useNativeDriver: true,
@@ -48,7 +82,7 @@ export function usePanResponder({ width, webviewRef }: UseAnimationsParams) {
 
             // Return to original position
             Animated.timing(pan, {
-              toValue: 0,
+              toValue: { x: 0, y: 0 },
               duration: 1,
               delay: 20,
               useNativeDriver: true,
@@ -60,14 +94,62 @@ export function usePanResponder({ width, webviewRef }: UseAnimationsParams) {
                 delay: 0,
                 useNativeDriver: true,
               }).start();
+
+              directionLocked.current = null;
+            });
+          });
+        } else if (
+          directionLocked.current === "VERTICAL" &&
+          Math.abs(gestureState.dy) > activateSize
+        ) {
+          const direction = gestureState.dy > 0 ? "SWIPE_TOP" : "SWIPE_BOTTOM";
+
+          // Animate labels opacity to 0 on release
+          Animated.timing(labelsOpacity, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }).start();
+
+          // Swiped sufficiently left or right
+          Animated.timing(pan, {
+            toValue: {
+              x: 0,
+              y: direction === "SWIPE_TOP" ? height : -1 * height,
+            }, // Move off-screen
+            delay: 0,
+            duration: 90,
+            useNativeDriver: true,
+          }).start(() => {
+            // Send a message to the WebView during the release phase
+            webviewRef.current?.postMessage(direction);
+
+            // Return to original position
+            Animated.timing(pan, {
+              toValue: { x: 0, y: 0 },
+              duration: 1,
+              delay: 20,
+              useNativeDriver: true,
+            }).start(() => {
+              // Restore labels opacity
+              Animated.timing(labelsOpacity, {
+                toValue: 1,
+                duration: 10,
+                delay: 0,
+                useNativeDriver: true,
+              }).start();
+
+              directionLocked.current = null;
             });
           });
         } else {
           // Reset if not swiped enough
           Animated.spring(pan, {
-            toValue: 0,
+            toValue: { x: 0, y: 0 },
             useNativeDriver: true,
           }).start();
+
+          directionLocked.current = null;
         }
       },
     })

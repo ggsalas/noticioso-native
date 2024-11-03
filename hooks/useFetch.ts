@@ -17,7 +17,6 @@ export const useAsyncFn = (fn: any, params: any): UseAsyncFnReturn => {
 
       try {
         const data = await fn(params);
-        console.log(data);
         setData(data);
         setError(null);
       } catch (error) {

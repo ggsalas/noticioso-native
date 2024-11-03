@@ -1,13 +1,15 @@
 import { getArticle } from "@/domain/getArticle";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { Text, StyleSheet } from "react-native";
+import { Text, StyleSheet, View } from "react-native";
 import { useAsyncFn } from "@/hooks/useFetch";
 import { HTMLPagesNav } from "@/components/HTMLPagesNav/index";
 import { useRouter } from "expo-router";
+import { useThemeContext } from "@/theme/ThemeProvider";
 
 export default function ArticlePage() {
   const { article_url } = useLocalSearchParams();
   const router = useRouter();
+  const { styles } = useStyles();
 
   const { data: article, loading, error } = useAsyncFn(getArticle, article_url);
 
@@ -50,8 +52,51 @@ export default function ArticlePage() {
 
   return (
     <>
-      <Stack.Screen options={{ title: article.title }} />
+      <Stack.Screen
+        options={{
+          headerTitle: () => (
+            <View style={styles.headerContainer}>
+              <Text style={styles.headerTitle}>{article.siteName}</Text>
+              <Text
+                style={styles.headerSubtitle}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {article.title}
+              </Text>
+            </View>
+          ),
+        }}
+      />
       <HTMLPagesNav html={getContent()} actions={actions} />
     </>
   );
+}
+
+function useStyles() {
+  const { theme } = useThemeContext();
+  const { fonts, sizes, colors } = theme;
+
+  const styles = StyleSheet.create({
+    headerContainer: {
+      flexShrink: 1,
+      alignItems: "flex-start",
+      borderColor: "red",
+      paddingRight: "20%",
+    },
+    headerTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: colors.text,
+    },
+    headerSubtitle: {
+      fontSize: 14,
+      lineHeight: 18,
+      height: 18,
+      color: colors.text,
+      overflow: "hidden",
+    },
+  });
+
+  return { styles };
 }

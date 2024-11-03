@@ -16,13 +16,14 @@ type HTMLPaesNavProps = {
 
 export function HTMLPagesNav({ html, actions }: HTMLPaesNavProps) {
   const webviewRef = useRef(null);
-  const { width } = Dimensions.get("window");
+  const { width, height } = Dimensions.get("window");
   const { styles, theme } = useStyles(width);
   const [pages, setPages] = useState<Pages>({
     isFirst: true,
   } as unknown as Pages);
-  const { panResponder, pan, elevation, labelsOpacity } = usePanResponder({
+  const { panResponder, pan, labelsOpacity } = usePanResponder({
     width,
+    height,
     webviewRef,
   });
 
@@ -98,7 +99,7 @@ export function HTMLPagesNav({ html, actions }: HTMLPaesNavProps) {
         style={[
           styles.pan,
           {
-            transform: [{ translateX: pan }],
+            transform: pan.getTranslateTransform(),
           },
         ]}
         {...panResponder.panHandlers}
@@ -109,6 +110,7 @@ export function HTMLPagesNav({ html, actions }: HTMLPaesNavProps) {
           originWhitelist={["*"]}
           source={{ html: content }}
           showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
           scrollEnabled={false}
           scalesPageToFit={false}
           onMessage={onMessage}
@@ -134,7 +136,7 @@ function useStyles(windowWidth: number) {
       flex: 1,
       overflow: "hidden",
       backgroundColor: colors.background,
-      elevation: 7,
+      elevation: 1,
     },
     webView: {
       width: windowWidth - sizes.s1 * 2,
