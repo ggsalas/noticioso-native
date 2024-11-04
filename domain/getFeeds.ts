@@ -3,7 +3,7 @@ import { Feed } from "~/types";
 const HARDCODED_FEEDS: Feed[] = [
   {
     name: "Clarin - Política",
-    url: "http://www.clarin.com/rss/politica/",
+    url: "https://www.clarin.com/rss/politica/",
     oldestArticle: 1,
     lang: "es",
   },
@@ -15,7 +15,7 @@ const HARDCODED_FEEDS: Feed[] = [
   },
   {
     name: "Clarin - Mundo",
-    url: "http://www.clarin.com/rss/mundo/",
+    url: "https://www.clarin.com/rss/mundo/",
     oldestArticle: 1,
     lang: "es",
   },
@@ -33,7 +33,7 @@ const HARDCODED_FEEDS: Feed[] = [
   },
   {
     name: "Clarin - Espectaculos",
-    url: "http://www.clarin.com/rss/espectaculos/",
+    url: "https://www.clarin.com/rss/espectaculos/",
     oldestArticle: 1,
     lang: "es",
   },
@@ -129,7 +129,7 @@ const HARDCODED_FEEDS: Feed[] = [
   },
   {
     name: "Cavallo",
-    url: "http://www.cavallo.com.ar/feed",
+    url: "https://www.cavallo.com.ar/feed",
     oldestArticle: 7,
     lang: "es",
   },

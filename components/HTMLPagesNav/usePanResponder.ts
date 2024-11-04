@@ -18,6 +18,7 @@ export function usePanResponder({
   const pan = useRef(new Animated.ValueXY()).current;
   const labelsOpacity = useRef(new Animated.Value(1)).current;
   const directionLocked = useRef<Direction>(null);
+  const isAnimating = useRef(false);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -37,12 +38,27 @@ export function usePanResponder({
             directionLocked.current = "VERTICAL";
             pan.setValue({ x: 0, y: dy });
           }
-        }
-
-        if (directionLocked.current === "HORIZONTAL") {
-          pan.setValue({ x: dx, y: 0 });
-        } else if (directionLocked.current === "VERTICAL") {
+        } else if (
+          directionLocked.current === "HORIZONTAL" &&
+          Math.abs(dy) > Math.abs(dx)
+        ) {
+          // Allow switching to vertical if dy is greater than dx
+          directionLocked.current = "VERTICAL";
           pan.setValue({ x: 0, y: dy });
+        } else if (
+          directionLocked.current === "VERTICAL" &&
+          Math.abs(dx) > Math.abs(dy)
+        ) {
+          // Allow switching to horizontal if dx is greater than dy
+          directionLocked.current = "HORIZONTAL";
+          pan.setValue({ x: dx, y: 0 });
+        } else {
+          // Continue moving in the locked direction
+          if (directionLocked.current === "HORIZONTAL") {
+            pan.setValue({ x: dx, y: 0 });
+          } else if (directionLocked.current === "VERTICAL") {
+            pan.setValue({ x: 0, y: dy });
+          }
         }
       },
       onPanResponderGrant: () => {
@@ -52,6 +68,10 @@ export function usePanResponder({
       },
       onPanResponderRelease: (_evt, gestureState) => {
         const activateSize = width / 12;
+
+        if (isAnimating.current) return;
+
+        isAnimating.current = true;
 
         if (
           directionLocked.current === "HORIZONTAL" &&
@@ -96,6 +116,7 @@ export function usePanResponder({
               }).start();
 
               directionLocked.current = null;
+              isAnimating.current = false;
             });
           });
         } else if (
@@ -140,6 +161,7 @@ export function usePanResponder({
               }).start();
 
               directionLocked.current = null;
+              isAnimating.current = false;
             });
           });
         } else {
@@ -150,6 +172,7 @@ export function usePanResponder({
           }).start();
 
           directionLocked.current = null;
+          isAnimating.current = false;
         }
       },
     })
