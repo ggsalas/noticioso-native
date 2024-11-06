@@ -1,8 +1,11 @@
 import { useThemeContext } from "@/theme/ThemeProvider";
 import { useRef, useState } from "react";
-import { StyleSheet, Dimensions, Animated, View } from "react-native";
+import { StyleSheet, Dimensions, Animated, View, Text } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
-import { getHorizontalNavigationPage } from "../../lib/horizontalNavigation";
+import {
+  getHorizontalNavigationPage,
+  script,
+} from "../../lib/horizontalNavigation";
 import { Labels } from "./Labels";
 import { usePanResponder } from "./usePanResponder";
 import {
@@ -53,6 +56,12 @@ export function HTMLPagesNav({
       const { viewportWidth, articleWidth, scrollLeft } = data;
 
       setPages(() => {
+        console.log(
+          "articleWidth: ",
+          articleWidth,
+          "viewportWidth: ",
+          viewportWidth
+        );
         const amount = Math.ceil(articleWidth / viewportWidth);
         const current = scrollLeft / viewportWidth + 1;
         const isFirst = scrollLeft == 0;
@@ -92,6 +101,8 @@ export function HTMLPagesNav({
         return handleLink && handleLink(data);
       case "HANDLE_ROUTER_LINK":
         return handleRouterLink && handleRouterLink(data);
+      case "console":
+        console.log("test: ", data);
       default:
         return;
     }
@@ -133,6 +144,7 @@ export function HTMLPagesNav({
           scrollEnabled={false}
           scalesPageToFit={false}
           onMessage={onMessage}
+          injectedJavaScript={script}
         />
 
         <PageIndicator pages={pages} />

@@ -11,8 +11,12 @@ export function PageIndicator({ pages }: PageIndicatorProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.current}>{`Page ${pages.current}`}</Text>
-      <Text style={styles.amount}>{`  of  ${pages.amount}`}</Text>
+      {pages.amount && (
+        <>
+          <Text style={styles.current}>{`Page ${pages.current}`}</Text>
+          <Text style={styles.amount}>{`  of  ${pages.amount}`}</Text>
+        </>
+      )}
     </View>
   );
 }
