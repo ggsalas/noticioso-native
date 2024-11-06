@@ -5,6 +5,7 @@ import { useAsyncFn } from "@/hooks/useFetch";
 import { HTMLPagesNav } from "@/components/HTMLPagesNav/index";
 import { useRouter } from "expo-router";
 import { useThemeContext } from "@/theme/ThemeProvider";
+import { HandleLinkData } from "@/types";
 
 export default function ArticlePage() {
   const { article_url } = useLocalSearchParams();
@@ -22,21 +23,25 @@ export default function ArticlePage() {
 
   const actions = {
     top: {
-      label: "Article List",
+      label: "Nothing",
       action: () => router.back(),
     },
     bottom: {
-      label: "Next Article",
+      label: "Article List",
       action: () => router.back(),
     },
     first: {
-      label: "Article List (for now)",
+      label: "Article List",
       action: () => router.back(),
     },
     last: {
-      label: "Article List (for now)",
+      label: "Article List",
       action: () => router.back(),
     },
+  };
+
+  const handleLink = ({ href }: HandleLinkData) => {
+    alert(`Unhandled link: ${href}`);
   };
 
   const getContent = () => {
@@ -68,21 +73,23 @@ export default function ArticlePage() {
           ),
         }}
       />
-      <HTMLPagesNav html={getContent()} actions={actions} />
+
+      <HTMLPagesNav
+        html={getContent()}
+        actions={actions}
+        handleLink={handleLink}
+      />
     </>
   );
 }
 
 function useStyles() {
   const { theme } = useThemeContext();
-  const { fonts, sizes, colors } = theme;
+  const { colors } = theme;
 
   const styles = StyleSheet.create({
     headerContainer: {
-      flexShrink: 1,
-      alignItems: "flex-start",
-      borderColor: "red",
-      paddingRight: "20%",
+      flexBasis: "80%",
     },
     headerTitle: {
       fontSize: 20,

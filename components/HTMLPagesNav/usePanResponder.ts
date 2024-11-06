@@ -22,7 +22,7 @@ export function usePanResponder({
 
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => false,
       onMoveShouldSetPanResponder: (_evt, gestureState) => {
         return Math.abs(gestureState.dx) > 20 || Math.abs(gestureState.dy) > 20;
       },

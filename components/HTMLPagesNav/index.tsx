@@ -1,20 +1,31 @@
 import { useThemeContext } from "@/theme/ThemeProvider";
 import { useRef, useState } from "react";
 import { StyleSheet, Dimensions, Animated, View } from "react-native";
-// import { PercentageBar } from "./PercentageBar";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import { getHorizontalNavigationPage } from "../../lib/horizontalNavigation";
 import { Labels } from "./Labels";
 import { usePanResponder } from "./usePanResponder";
-import { HTMLPagesNavActions, Pages } from "@/types";
+import {
+  HTMLPagesNavActions,
+  HandleLinkData,
+  HandleRouterLinkData,
+  Pages,
+} from "@/types";
 import { PageIndicator } from "./PageIndicator";
 
 type HTMLPaesNavProps = {
   html: string;
   actions: HTMLPagesNavActions;
+  handleLink?: (data: HandleLinkData) => void;
+  handleRouterLink?: (data: HandleRouterLinkData) => void;
 };
 
-export function HTMLPagesNav({ html, actions }: HTMLPaesNavProps) {
+export function HTMLPagesNav({
+  html,
+  actions,
+  handleLink,
+  handleRouterLink,
+}: HTMLPaesNavProps) {
   const webviewRef = useRef(null);
   const { width, height } = Dimensions.get("window");
   const { styles, theme } = useStyles(width);
@@ -36,10 +47,11 @@ export function HTMLPagesNav({ html, actions }: HTMLPaesNavProps) {
   // Receives messages from JS inside page content
   const onMessage = (event: WebViewMessageEvent) => {
     const stringifyData = event.nativeEvent.data;
-    const { viewportWidth, articleWidth, scrollLeft, eventName } =
-      JSON.parse(stringifyData) ?? {};
+    const { eventName, ...data } = JSON.parse(stringifyData) ?? {};
 
-    const handlePages = () =>
+    const handlePages = () => {
+      const { viewportWidth, articleWidth, scrollLeft } = data;
+
       setPages(() => {
         const amount = Math.ceil(articleWidth / viewportWidth);
         const current = scrollLeft / viewportWidth + 1;
@@ -53,6 +65,7 @@ export function HTMLPagesNav({ html, actions }: HTMLPaesNavProps) {
           isLast,
         };
       });
+    };
 
     switch (eventName) {
       case "SWIPE_NEXT":
@@ -73,8 +86,14 @@ export function HTMLPagesNav({ html, actions }: HTMLPaesNavProps) {
         return actions.top && actions.top.action();
       case "SWIPE_BOTTOM":
         return actions.bottom && actions.bottom.action();
+      case "ON_LOAD":
+        return handlePages();
+      case "HANDLE_LINK":
+        return handleLink && handleLink(data);
+      case "HANDLE_ROUTER_LINK":
+        return handleRouterLink && handleRouterLink(data);
       default:
-        handlePages();
+        return;
     }
   };
 

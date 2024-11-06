@@ -74,3 +74,11 @@ export type HTMLPagesNavActions = {
   first: HTMLPagesNavActionItem;
   last: HTMLPagesNavActionItem;
 };
+
+export type HandleLinkData = {
+  href: string;
+};
+
+export type HandleRouterLinkData = {
+  path: string;
+};

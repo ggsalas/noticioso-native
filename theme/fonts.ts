@@ -17,6 +17,7 @@ export type Fonts = {
   fontSizeH4: number;
   fontSizeH5: number;
   fontSizeP: number;
+  fontSizeSmall: number;
   fontSizeCode: number;
 
   lineHeightMinimal: number;
@@ -35,13 +36,13 @@ export function getFonts(baseFontSize: number): Fonts {
   return {
     baseFontSize,
 
-    fontFamilyRegular: "Alegreya_400Regular",
+    fontFamilyRegular: "Alegreya_500Medium",
     fontFamilyBold: "Alegreya_700Bold",
-    fontFamilyItalic: "Alegreya_400Regular_Italic",
+    fontFamilyItalic: "Alegreya_500Medium_Italic",
     fontFamilyBoldItalic: "Alegreya_700Bold_Italic",
 
-    fontFamilyCodeRegular: "JetBrainsMono_400Regular",
-    fontFamilyCodeBold: "JetBrainsMono_400Regular_Italic",
+    fontFamilyCodeRegular: "JetBrainsMono_500Medium",
+    fontFamilyCodeBold: "JetBrainsMono_500Medium_Italic",
     fontFamilyCodeItalic: "JetBrainsMono_700Bold",
     fontFamilyCodeBoldItalic: "JetBrainsMono_700Bold_Italic",
 
@@ -51,10 +52,11 @@ export function getFonts(baseFontSize: number): Fonts {
     fontSizeH4: baseFontSize * 1.15,
     fontSizeH5: baseFontSize * 1.1,
     fontSizeP: baseFontSize * 1,
+    fontSizeSmall: baseFontSize * 0.8,
     fontSizeCode: baseFontSize * 0.7,
 
     lineHeightMinimal: baseFontSize * 1,
-    lineHeightSmall: baseFontSize * 1.30,
+    lineHeightSmall: baseFontSize * 1.3,
     lineHeightComfortable: baseFontSize * 1.4,
     lineHeightCode: baseFontSize * 0.7 * 1.2,
 
@@ -68,12 +70,12 @@ export function getFonts(baseFontSize: number): Fonts {
 }
 
 export const appFontNames = [
-  "Alegreya_400Regular",
-  "Alegreya_400Regular_Italic",
+  "Alegreya_500Medium",
+  "Alegreya_500Medium_Italic",
   "Alegreya_700Bold",
   "Alegreya_700Bold_Italic",
-  "JetBrainsMono_400Regular",
-  "JetBrainsMono_400Regular_Italic",
+  "JetBrainsMono_500Medium",
+  "JetBrainsMono_500Medium_Italic",
   "JetBrainsMono_700Bold",
   "JetBrainsMono_700Bold_Italic",
 ];

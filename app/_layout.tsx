@@ -2,14 +2,14 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { Stack } from "expo-router";
 import {
-  Alegreya_400Regular,
-  Alegreya_400Regular_Italic,
+  Alegreya_500Medium,
+  Alegreya_500Medium_Italic,
   Alegreya_700Bold,
   Alegreya_700Bold_Italic,
 } from "@expo-google-fonts/alegreya";
 import {
-  JetBrainsMono_400Regular,
-  JetBrainsMono_400Regular_Italic,
+  JetBrainsMono_500Medium,
+  JetBrainsMono_500Medium_Italic,
   JetBrainsMono_700Bold,
   JetBrainsMono_700Bold_Italic,
 } from "@expo-google-fonts/jetbrains-mono";
@@ -25,12 +25,12 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded, error] = useFonts({
-    Alegreya_400Regular,
-    Alegreya_400Regular_Italic,
+    Alegreya_500Medium,
+    Alegreya_500Medium_Italic,
     Alegreya_700Bold,
     Alegreya_700Bold_Italic,
-    JetBrainsMono_400Regular,
-    JetBrainsMono_400Regular_Italic,
+    JetBrainsMono_500Medium,
+    JetBrainsMono_500Medium_Italic,
     JetBrainsMono_700Bold,
     JetBrainsMono_700Bold_Italic,
   });

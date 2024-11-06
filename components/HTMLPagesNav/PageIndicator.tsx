@@ -12,7 +12,7 @@ export function PageIndicator({ pages }: PageIndicatorProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.current}>{`Page ${pages.current}`}</Text>
-      <Text style={styles.amount}>{` of ${pages.amount}`}</Text>
+      <Text style={styles.amount}>{`  of  ${pages.amount}`}</Text>
     </View>
   );
 }
@@ -34,12 +34,13 @@ function useStyles() {
       paddingRight: sizes.s1,
     },
     current: {
-      fontSize: fonts.marginP,
-      fontWeight: "bold",
+      fontFamily: fonts.fontFamilyBold,
+      fontSize: fonts.fontSizeP,
       color: colors.text,
     },
     amount: {
-      fontSize: fonts.marginP,
+      fontFamily: fonts.fontFamilyItalic,
+      fontSize: fonts.fontSizeSmall,
       fontWeight: "normal",
       color: colors.text,
     },
