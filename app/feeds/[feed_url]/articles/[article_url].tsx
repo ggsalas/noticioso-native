@@ -10,11 +10,14 @@ import { HandleLinkData } from "@/types";
 export default function ArticlePage() {
   const { article_url } = useLocalSearchParams();
   const router = useRouter();
-  const { styles } = useStyles();
+  const { styles, colors, sizes } = useStyles();
 
   const { data: article, loading, error } = useAsyncFn(getArticle, article_url);
 
-  if (loading) return <Text>Loading...</Text>;
+  if (loading)
+    return (
+      <Text style={{ color: colors.text, padding: sizes.s1 }}>Loading...</Text>
+    );
 
   if ((!loading && !article) || error)
     return <Text>The app has failed to get article content</Text>;
@@ -85,7 +88,7 @@ export default function ArticlePage() {
 
 function useStyles() {
   const { theme } = useThemeContext();
-  const { colors } = theme;
+  const { colors, sizes } = theme;
 
   const styles = StyleSheet.create({
     headerContainer: {
@@ -105,5 +108,5 @@ function useStyles() {
     },
   });
 
-  return { styles };
+  return { styles, colors, sizes };
 }

@@ -1,5 +1,5 @@
 import { useThemeContext } from "@/theme/ThemeProvider";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { StyleSheet, Dimensions, Animated, View, Text } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import {
@@ -35,17 +35,22 @@ export function HTMLPagesNav({
   const [pages, setPages] = useState<Pages>({
     isFirst: true,
   } as unknown as Pages);
-  const { panResponder, pan, labelsOpacity } = usePanResponder({
+  const { panResponder, pan, labelsOpacity, opacity } = usePanResponder({
     width,
     height,
     webviewRef,
   });
 
-  const content = getHorizontalNavigationPage({
-    content: html,
-    width: styles.webView.width,
-    theme,
-  });
+  const content = useMemo(
+    () =>
+      getHorizontalNavigationPage({
+        content: html,
+        width: styles.webView.width,
+        theme,
+        pageNumber: pages.current,
+      }),
+    [html, styles.webView.width, theme, pages.current]
+  );
 
   // Receives messages from JS inside page content
   const onMessage = (event: WebViewMessageEvent) => {
@@ -56,15 +61,26 @@ export function HTMLPagesNav({
       const { viewportWidth, articleWidth, scrollLeft } = data;
 
       setPages(() => {
-        console.log(
-          "articleWidth: ",
-          articleWidth,
-          "viewportWidth: ",
-          viewportWidth
-        );
+        const getUpdatedScrollLeft = (): number => {
+          if (eventName === "SWIPE_NEXT") {
+            // Prevent overflow at end
+            if (!(articleWidth <= scrollLeft + viewportWidth)) {
+              return scrollLeft + viewportWidth;
+            }
+          } else if (eventName === "SWIPE_PREVIOUS") {
+            // Prevent overflow at start
+            if (scrollLeft != 0) {
+              return scrollLeft - viewportWidth;
+            }
+          }
+
+          return scrollLeft;
+        };
+
+        const newScrollLeft = getUpdatedScrollLeft();
         const amount = Math.ceil(articleWidth / viewportWidth);
-        const current = scrollLeft / viewportWidth + 1;
-        const isFirst = scrollLeft == 0;
+        const current = newScrollLeft / viewportWidth + 1;
+        const isFirst = newScrollLeft == 0;
         const isLast = amount == current;
 
         return {
@@ -101,8 +117,6 @@ export function HTMLPagesNav({
         return handleLink && handleLink(data);
       case "HANDLE_ROUTER_LINK":
         return handleRouterLink && handleRouterLink(data);
-      case "console":
-        console.log("test: ", data);
       default:
         return;
     }
@@ -130,6 +144,7 @@ export function HTMLPagesNav({
           styles.pan,
           {
             transform: pan.getTranslateTransform(),
+            opacity,
           },
         ]}
         {...panResponder.panHandlers}

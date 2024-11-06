@@ -2,6 +2,7 @@ import { HTMLPagesNav } from "@/components/HTMLPagesNav";
 import { PagedNavigation } from "@/components/PagedNavigation";
 import { getFeedContent } from "@/domain/getFeedContent";
 import { useAsyncFn } from "@/hooks/useFetch";
+import { usePreviousRoute } from "@/hooks/usePreviousRoute";
 import { useThemeContext } from "@/theme/ThemeProvider";
 import { HandleLinkData, HandleRouterLinkData } from "@/types";
 import { Link, Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -14,6 +15,10 @@ export default function FeedPage() {
   const { data, loading, error } = useAsyncFn(getFeedContent, feed_url);
   const content = data?.rss?.channel?.item;
   const title = data?.rss?.channel?.title;
+
+  const previousRoute = usePreviousRoute();
+  const previousArticleUrl = (previousRoute?.params as { article_url: string })
+    ?.article_url;
 
   const actions = {
     top: {
@@ -42,7 +47,15 @@ export default function FeedPage() {
     router.navigate(path);
   };
 
-  if (loading) return <Text>Loading...</Text>;
+  const getRouteLink = (link: string) =>
+    `/feeds/${encodeURIComponent(
+      feed_url as string
+    )}/articles/${encodeURIComponent(link)}`;
+
+  if (loading)
+    return (
+      <Text style={{ color: colors.text, padding: sizes.s1 }}>Loading...</Text>
+    );
 
   if ((!loading && !content) || error)
     return (
@@ -60,12 +73,10 @@ export default function FeedPage() {
   // ${ description ? '<div class="description">' + description + "</div>" : "" }
   const htmlItems = content
     .map(
-      ({ title, link, description, author }: any) => `
+      ({ title, link, description }: any) => `
         <div 
           class="item" 
-          data-route-link="/feeds/${encodeURIComponent(
-            feed_url as string
-          )}/articles/${encodeURIComponent(link)}" 
+          data-route-link="${getRouteLink(link)}" 
         >
           <h3 class="title">${title}</h3>
         </div>
@@ -82,6 +93,10 @@ export default function FeedPage() {
         padding: ${sizes.s1}px 0;
         text-decoration: none;
         break-inside: avoid;
+      }
+
+      .item[data-route-link*="${previousArticleUrl}"] {
+        border-bottom-width: 5px;
       }
 
       .title {

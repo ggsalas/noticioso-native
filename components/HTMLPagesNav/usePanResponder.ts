@@ -1,4 +1,4 @@
-import { RefObject, useRef, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { Animated, PanResponder } from "react-native";
 import WebView from "react-native-webview";
 
@@ -9,6 +9,8 @@ type UseAnimationsParams = {
 };
 
 type Direction = "HORIZONTAL" | "VERTICAL" | null;
+const LOAD_TIME = 150;
+const OPACITY_TRANSITION = 0; // only affects the background
 
 export function usePanResponder({
   width,
@@ -16,9 +18,28 @@ export function usePanResponder({
   webviewRef,
 }: UseAnimationsParams) {
   const pan = useRef(new Animated.ValueXY()).current;
-  const labelsOpacity = useRef(new Animated.Value(1)).current;
   const directionLocked = useRef<Direction>(null);
+  const opaqueLoader = useRef(new Animated.Value(1)).current;
   const isAnimating = useRef(false);
+
+  const opacity = useRef(new Animated.Value(0)).current;
+  const labelsOpacity = useRef(new Animated.Value(0)).current;
+
+  // animate opacity on load
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: OPACITY_TRANSITION,
+      delay: LOAD_TIME,
+      useNativeDriver: true,
+    }).start(() => {
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 0,
+        useNativeDriver: true,
+      }).start();
+    });
+  }, [opacity]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -100,20 +121,34 @@ export function usePanResponder({
             // Send a message to the WebView during the release phase
             webviewRef.current?.postMessage(direction);
 
+            // Disappear content
+            Animated.timing(opacity, {
+              toValue: 0,
+              duration: 0,
+              useNativeDriver: true,
+            }).start();
+
             // Return to original position
             Animated.timing(pan, {
               toValue: { x: 0, y: 0 },
-              duration: 1,
-              delay: 20,
+              duration: 100,
               useNativeDriver: true,
             }).start(() => {
-              // Restore labels opacity
-              Animated.timing(labelsOpacity, {
+              // Reappear content
+              Animated.timing(opacity, {
                 toValue: 1,
-                duration: 10,
-                delay: 0,
+                duration: OPACITY_TRANSITION,
+                delay: LOAD_TIME,
                 useNativeDriver: true,
-              }).start();
+              }).start(() => {
+                // Restore labels opacity
+                Animated.timing(labelsOpacity, {
+                  toValue: 1,
+                  duration: 10,
+                  delay: 0,
+                  useNativeDriver: true,
+                }).start();
+              });
 
               directionLocked.current = null;
               isAnimating.current = false;
@@ -178,5 +213,5 @@ export function usePanResponder({
     })
   ).current;
 
-  return { panResponder, pan, labelsOpacity };
+  return { panResponder, pan, labelsOpacity, opaqueLoader, opacity };
 }
