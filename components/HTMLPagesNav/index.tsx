@@ -1,5 +1,5 @@
 import { useThemeContext } from "@/theme/ThemeProvider";
-import { useMemo, useRef, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { StyleSheet, Dimensions, Animated, View, Text } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import {
@@ -15,42 +15,65 @@ import {
   Pages,
 } from "@/types";
 import { PageIndicator } from "./PageIndicator";
+import { getWebViewEvents } from "./webViewEvents";
+import { useFocusEffect } from "expo-router";
 
 type HTMLPaesNavProps = {
+  name: string;
   html: string;
   actions: HTMLPagesNavActions;
   handleLink?: (data: HandleLinkData) => void;
   handleRouterLink?: (data: HandleRouterLinkData) => void;
 };
 
-export function HTMLPagesNav({
+export function HTMLPagesNavComponent({
+  name,
   html,
   actions,
   handleLink,
   handleRouterLink,
 }: HTMLPaesNavProps) {
-  const webviewRef = useRef(null);
+  const webviewRef = useRef<WebView>(null);
   const { width, height } = Dimensions.get("window");
   const { styles, theme } = useStyles(width);
   const [pages, setPages] = useState<Pages>({
+    scrollLeft: 0,
     isFirst: true,
+    isLast: false,
   } as unknown as Pages);
   const { panResponder, pan, labelsOpacity, opacity } = usePanResponder({
+    name,
     width,
     height,
     webviewRef,
   });
 
-  const content = useMemo(
-    () =>
-      getHorizontalNavigationPage({
-        content: html,
-        width: styles.webView.width,
-        theme,
-        pageNumber: pages.current,
-      }),
-    [html, styles.webView.width, theme, pages.current]
-  );
+  const content = getHorizontalNavigationPage({
+    content: html,
+    width: styles.webView.width,
+    theme,
+  });
+
+  const webViewEvents = getWebViewEvents(name);
+  const {
+    SWIPE_NEXT,
+    SWIPE_PREVIOUS,
+    SWIPE_TOP,
+    SWIPE_BOTTOM,
+    ON_LOAD,
+    HANDLE_LINK,
+    HANDLE_ROUTER_LINK,
+    _CONSOLE_,
+  } = webViewEvents;
+
+  const handleScroll = useCallback((scrollLeft: number) => {
+    webviewRef.current?.injectJavaScript(`
+      document.getElementById("viewport").scrollLeft = ${scrollLeft};
+      true;
+    `);
+  }, []);
+
+  useFocusEffect(() => handleScroll(pages.scrollLeft));
 
   // Receives messages from JS inside page content
   const onMessage = (event: WebViewMessageEvent) => {
@@ -58,65 +81,73 @@ export function HTMLPagesNav({
     const { eventName, ...data } = JSON.parse(stringifyData) ?? {};
 
     const handlePages = () => {
-      const { viewportWidth, articleWidth, scrollLeft } = data;
+      const { viewportWidth, articleWidth } = data;
+      const { scrollLeft } = pages;
+
+      const getUpdatedScrollLeft = (): number => {
+        if (eventName === SWIPE_NEXT) {
+          // Prevent overflow at end
+          if (!(articleWidth <= scrollLeft + viewportWidth)) {
+            return scrollLeft + viewportWidth;
+          }
+        } else if (eventName === SWIPE_PREVIOUS) {
+          // Prevent overflow at start
+          if (scrollLeft != 0) {
+            return scrollLeft - viewportWidth;
+          }
+        }
+
+        return pages.scrollLeft;
+      };
+
+      const updatedScrollLeft = getUpdatedScrollLeft();
 
       setPages(() => {
-        const getUpdatedScrollLeft = (): number => {
-          if (eventName === "SWIPE_NEXT") {
-            // Prevent overflow at end
-            if (!(articleWidth <= scrollLeft + viewportWidth)) {
-              return scrollLeft + viewportWidth;
-            }
-          } else if (eventName === "SWIPE_PREVIOUS") {
-            // Prevent overflow at start
-            if (scrollLeft != 0) {
-              return scrollLeft - viewportWidth;
-            }
-          }
-
-          return scrollLeft;
-        };
-
-        const newScrollLeft = getUpdatedScrollLeft();
         const amount = Math.ceil(articleWidth / viewportWidth);
-        const current = newScrollLeft / viewportWidth + 1;
-        const isFirst = newScrollLeft == 0;
+        const current = updatedScrollLeft / viewportWidth + 1;
+        const isFirst = updatedScrollLeft == 0;
         const isLast = amount == current;
 
         return {
           amount,
           current,
+          scrollLeft: updatedScrollLeft,
           isFirst,
           isLast,
         };
       });
+
+      handleScroll(updatedScrollLeft);
     };
 
     switch (eventName) {
-      case "SWIPE_NEXT":
+      case SWIPE_NEXT:
         if (pages.isLast) {
           return actions.last.action();
         } else {
           handlePages();
           return;
         }
-      case "SWIPE_PREVIOUS":
+      case SWIPE_PREVIOUS:
         if (pages.isFirst) {
           return actions.first.action();
         } else {
           handlePages();
           return;
         }
-      case "SWIPE_TOP":
+      case SWIPE_TOP:
         return actions.top && actions.top.action();
-      case "SWIPE_BOTTOM":
+      case SWIPE_BOTTOM:
         return actions.bottom && actions.bottom.action();
-      case "ON_LOAD":
+      case ON_LOAD: {
         return handlePages();
-      case "HANDLE_LINK":
+      }
+      case HANDLE_LINK:
         return handleLink && handleLink(data);
-      case "HANDLE_ROUTER_LINK":
+      case HANDLE_ROUTER_LINK:
         return handleRouterLink && handleRouterLink(data);
+      case _CONSOLE_:
+        return console.log(data);
       default:
         return;
     }
@@ -151,7 +182,7 @@ export function HTMLPagesNav({
       >
         <WebView
           ref={webviewRef}
-          style={styles.webView}
+          style={[styles.webView, { opacity: pages.amount > 0 ? 1 : 0 }]}
           originWhitelist={["*"]}
           source={{ html: content }}
           showsHorizontalScrollIndicator={false}
@@ -159,7 +190,7 @@ export function HTMLPagesNav({
           scrollEnabled={false}
           scalesPageToFit={false}
           onMessage={onMessage}
-          injectedJavaScript={script}
+          injectedJavaScript={script(webViewEvents)}
         />
 
         <PageIndicator pages={pages} />
@@ -208,3 +239,7 @@ function useStyles(windowWidth: number) {
 
   return { styles, theme };
 }
+
+export const HTMLPagesNav = memo((props: HTMLPaesNavProps) => (
+  <HTMLPagesNavComponent {...props} />
+));

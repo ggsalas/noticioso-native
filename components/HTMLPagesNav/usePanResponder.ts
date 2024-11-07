@@ -1,8 +1,10 @@
 import { RefObject, useEffect, useRef, useState } from "react";
 import { Animated, PanResponder } from "react-native";
 import WebView from "react-native-webview";
+import { getWebViewEvents } from "./webViewEvents";
 
 type UseAnimationsParams = {
+  name: string;
   width: number;
   height: number;
   webviewRef: RefObject<WebView>;
@@ -13,6 +15,7 @@ const LOAD_TIME = 150;
 const OPACITY_TRANSITION = 0; // only affects the background
 
 export function usePanResponder({
+  name,
   width,
   height,
   webviewRef,
@@ -24,6 +27,9 @@ export function usePanResponder({
 
   const opacity = useRef(new Animated.Value(0)).current;
   const labelsOpacity = useRef(new Animated.Value(0)).current;
+
+  const { SWIPE_PREVIOUS, SWIPE_NEXT, SWIPE_BOTTOM, SWIPE_TOP } =
+    getWebViewEvents(name);
 
   // animate opacity on load
   useEffect(() => {
@@ -98,8 +104,7 @@ export function usePanResponder({
           directionLocked.current === "HORIZONTAL" &&
           Math.abs(gestureState.dx) > activateSize
         ) {
-          const direction =
-            gestureState.dx > 0 ? "SWIPE_PREVIOUS" : "SWIPE_NEXT";
+          const direction = gestureState.dx > 0 ? SWIPE_PREVIOUS : SWIPE_NEXT;
 
           // Animate labels opacity to 0 on release
           Animated.timing(labelsOpacity, {
@@ -111,7 +116,7 @@ export function usePanResponder({
           // Swiped sufficiently left or right
           Animated.timing(pan, {
             toValue: {
-              x: direction === "SWIPE_PREVIOUS" ? width : -1 * width,
+              x: direction === SWIPE_PREVIOUS ? width : -1 * width,
               y: 0,
             }, // Move off-screen
             delay: 0,
@@ -158,7 +163,7 @@ export function usePanResponder({
           directionLocked.current === "VERTICAL" &&
           Math.abs(gestureState.dy) > activateSize
         ) {
-          const direction = gestureState.dy > 0 ? "SWIPE_TOP" : "SWIPE_BOTTOM";
+          const direction = gestureState.dy > 0 ? SWIPE_TOP : SWIPE_BOTTOM;
 
           // Animate labels opacity to 0 on release
           Animated.timing(labelsOpacity, {
@@ -171,7 +176,7 @@ export function usePanResponder({
           Animated.timing(pan, {
             toValue: {
               x: 0,
-              y: direction === "SWIPE_TOP" ? height : -1 * height,
+              y: direction === SWIPE_TOP ? height : -1 * height,
             }, // Move off-screen
             delay: 0,
             duration: 90,

@@ -59,6 +59,7 @@ export type FeedData = {
 export type Pages = {
   amount: number;
   current: number;
+  scrollLeft: number;
   isFirst: Boolean;
   isLast: Boolean;
 };

@@ -78,6 +78,7 @@ export default function ArticlePage() {
       />
 
       <HTMLPagesNav
+        name="article"
         html={getContent()}
         actions={actions}
         handleLink={handleLink}

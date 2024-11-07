@@ -130,6 +130,7 @@ export default function FeedPage() {
       <Stack.Screen options={{ title: title }} />
 
       <HTMLPagesNav
+        name="feed"
         html={html}
         actions={actions}
         handleLink={handleLink}
