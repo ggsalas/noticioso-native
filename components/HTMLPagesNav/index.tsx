@@ -1,6 +1,6 @@
 import { useThemeContext } from "@/theme/ThemeProvider";
-import { memo, useCallback, useMemo, useRef, useState } from "react";
-import { StyleSheet, Dimensions, Animated, View, Text } from "react-native";
+import { memo, useCallback, useRef, useState } from "react";
+import { StyleSheet, Dimensions, Animated, View } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import {
   getHorizontalNavigationPage,

@@ -1,5 +1,5 @@
 import { Link, Stack } from "expo-router";
-import { Text, StyleSheet, ScrollView } from "react-native";
+import { Text, StyleSheet } from "react-native";
 import { getFeeds } from "../../domain/getFeeds";
 import { useEffect, useState } from "react";
 import { Feed } from "@/types";

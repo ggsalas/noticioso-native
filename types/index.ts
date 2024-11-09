@@ -1,6 +1,4 @@
 import { Readability } from "@mozilla/readability";
-import type { getFeedContent } from "../domain/getFeedContent";
-import { NativeSyntheticEvent } from "react-native";
 
 type ReadabilityArticle = ReturnType<Readability["parse"]>;
 

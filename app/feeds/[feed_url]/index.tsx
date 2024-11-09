@@ -1,12 +1,11 @@
 import { HTMLPagesNav } from "@/components/HTMLPagesNav";
-import { PagedNavigation } from "@/components/PagedNavigation";
 import { getFeedContent } from "@/domain/getFeedContent";
 import { useAsyncFn } from "@/hooks/useFetch";
 import { usePreviousRoute } from "@/hooks/usePreviousRoute";
 import { useThemeContext } from "@/theme/ThemeProvider";
 import { HandleLinkData, HandleRouterLinkData } from "@/types";
-import { Link, Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { Text, StyleSheet, Pressable } from "react-native";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Text } from "react-native";
 
 export default function FeedPage() {
   const { colors, fonts, sizes } = useStyles();
@@ -66,23 +65,24 @@ export default function FeedPage() {
       </>
     );
 
-  if (content.length === 0) return <Text>No new content for this feed</Text>;
-
   // TODO on big screens
   // ${author ? '<div class="author">' + author + "</Text>" : ""}
   // ${ description ? '<div class="description">' + description + "</div>" : "" }
-  const htmlItems = content
-    .map(
-      ({ title, link, description }: any) => `
-        <div 
-          class="item" 
-          data-route-link="${getRouteLink(link)}" 
-        >
-          <h3 class="title">${title}</h3>
-        </div>
-      `
-    )
-    .join("");
+  const htmlItems =
+    content.length === 0
+      ? '<div class="no-new-conent">No new content for this feed</div>'
+      : content
+          .map(
+            ({ title, link }: any) => `
+            <div 
+              class="item" 
+              data-route-link="${getRouteLink(link)}" 
+            >
+              <h3 class="title">${title}</h3>
+            </div>
+          `
+          )
+          .join("");
 
   const html = `
     <style>
@@ -109,8 +109,8 @@ export default function FeedPage() {
 
       .author {
         color: ${colors.text};
-        font-family: ${fonts.fontFamilyItalic};
         font-size: ${fonts.fontSizeP}px;
+        font-style: italic;
         line-height: ${fonts.lineHeightComfortable}px;
         margin-bottom: ${fonts.marginP}px;
       }
@@ -119,6 +119,15 @@ export default function FeedPage() {
         color: colors.text,
         font-size: ${fonts.fontSizeSmall}px;
         line-height: ${fonts.lineHeightComfortable}px;
+      }
+
+      .no-new-conent {
+        color: ${colors.text};
+        font-size: ${fonts.fontSizeP}px;
+        font-weight: bold;
+        line-height: ${fonts.lineHeightComfortable}px;
+        margin: 0;
+        padding: ${sizes.s1}px 0;
       }
     </style>
 

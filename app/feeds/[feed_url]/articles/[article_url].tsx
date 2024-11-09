@@ -22,8 +22,6 @@ export default function ArticlePage() {
   if ((!loading && !article) || error)
     return <Text>The app has failed to get article content</Text>;
 
-  if (!article) return <Text>Loading...</Text>;
-
   const actions = {
     top: {
       label: "Nothing",

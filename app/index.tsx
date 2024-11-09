@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { Pressable, Text, View, StyleSheet, Button } from "react-native";
+import { Pressable, Text, View, StyleSheet } from "react-native";
 import { useThemeContext } from "@/theme/ThemeProvider";
 
 export default function Index() {

@@ -1,6 +1,5 @@
 import { useThemeContext } from "@/theme/ThemeProvider";
-import { Pages } from "@/types";
-import { StyleSheet, View, Text, Pressable } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 
 type HTMLPageNavLabelsProps = {
   topLabel?: string;

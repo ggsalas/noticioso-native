@@ -11,7 +11,7 @@ type UseAnimationsParams = {
 };
 
 type Direction = "HORIZONTAL" | "VERTICAL" | null;
-const LOAD_TIME = 150;
+const LOAD_TIME = 50;
 const OPACITY_TRANSITION = 0; // only affects the background
 
 export function usePanResponder({
@@ -25,27 +25,28 @@ export function usePanResponder({
   const opaqueLoader = useRef(new Animated.Value(1)).current;
   const isAnimating = useRef(false);
 
-  const opacity = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(1)).current;
   const labelsOpacity = useRef(new Animated.Value(0)).current;
 
   const { SWIPE_PREVIOUS, SWIPE_NEXT, SWIPE_BOTTOM, SWIPE_TOP } =
     getWebViewEvents(name);
 
-  // animate opacity on load
-  useEffect(() => {
-    Animated.timing(opacity, {
-      toValue: 1,
-      duration: OPACITY_TRANSITION,
-      delay: LOAD_TIME,
-      useNativeDriver: true,
-    }).start(() => {
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 0,
-        useNativeDriver: true,
-      }).start();
-    });
-  }, [opacity]);
+  // Seems not neccesary
+  // // animate opacity on load
+  // useEffect(() => {
+  //   Animated.timing(opacity, {
+  //     toValue: 1,
+  //     duration: OPACITY_TRANSITION,
+  //     delay: LOAD_TIME,
+  //     useNativeDriver: true,
+  //   }).start(() => {
+  //     Animated.timing(opacity, {
+  //       toValue: 1,
+  //       duration: 0,
+  //       useNativeDriver: true,
+  //     }).start();
+  //   });
+  // }, [opacity]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -136,7 +137,7 @@ export function usePanResponder({
             // Return to original position
             Animated.timing(pan, {
               toValue: { x: 0, y: 0 },
-              duration: 100,
+              duration: 0,
               useNativeDriver: true,
             }).start(() => {
               // Reappear content
