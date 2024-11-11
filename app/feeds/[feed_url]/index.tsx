@@ -66,19 +66,19 @@ export default function FeedPage() {
     );
 
   // TODO on big screens
-  // ${author ? '<div class="author">' + author + "</Text>" : ""}
   // ${ description ? '<div class="description">' + description + "</div>" : "" }
   const htmlItems =
     content.length === 0
       ? '<div class="no-new-conent">No new content for this feed</div>'
       : content
           .map(
-            ({ title, link }: any) => `
+            ({ title, link, author }: any) => `
             <div 
               class="item" 
               data-route-link="${getRouteLink(link)}" 
             >
               <h3 class="title">${title}</h3>
+              ${author ? '<p class="author">' + author + "</p>" : ""}
             </div>
           `
           )
@@ -109,10 +109,10 @@ export default function FeedPage() {
 
       .author {
         color: ${colors.text};
-        font-size: ${fonts.fontSizeP}px;
+        font-size: ${fonts.fontSizeSmall}px;
         font-style: italic;
         line-height: ${fonts.lineHeightComfortable}px;
-        margin-bottom: ${fonts.marginP}px;
+        margin: 0;
       }
 
       .description {
