@@ -1,33 +1,42 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-type UseAsyncFnReturn = {
-  data: any;
+type UseAsyncFn<T> = {
+  data: T | null;
   loading: boolean;
-  error: any;
+  error: string | null;
+
+  runFn: () => Promise<void>;
 };
 
-export const useAsyncFn = (fn: any, params?: any): UseAsyncFnReturn => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
+export const useAsyncFn = <T>(
+  fn: (params?: any) => Promise<T>,
+  params?: any
+): UseAsyncFn<T> => {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const runAsyncFn = async () => {
-      setLoading(true);
+  const runFn = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-      try {
-        const data = await fn(params);
-        setData(data);
-        setError(null);
-      } catch (error) {
-        setError(`${error}`);
-      } finally {
-        setLoading(false);
+    try {
+      const result = await fn(params);
+      setData(result);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message); // Capture the error message
+      } else {
+        setError("An unknown error occurred");
       }
-    };
-
-    runAsyncFn();
+    } finally {
+      setLoading(false);
+    }
   }, [fn, params]);
 
-  return { data, loading, error };
+  useEffect(() => {
+    runFn();
+  }, [runFn]);
+
+  return { data, loading, error, runFn };
 };

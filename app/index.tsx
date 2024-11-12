@@ -1,15 +1,13 @@
 import { Link, Redirect, Stack } from "expo-router";
 import { Pressable, Text, View, StyleSheet } from "react-native";
 import { useThemeContext } from "@/theme/ThemeProvider";
-import { useGetFeeds } from "@/hooks/useGetFeeds";
-import { getFeeds } from "@/domain/getFeeds";
-import { useAsyncFn } from "@/hooks/useFetch";
+import { useFeedsContext } from "@/providers/FeedsProvider";
 
 export default function Index() {
   const { style } = useStyles();
-  const { data, loading, error } = useAsyncFn(getFeeds);
+  const { feeds, loading, error } = useFeedsContext();
 
-  if (!loading && data?.length > 0) {
+  if (!loading && feeds && feeds?.length > 0) {
     return <Redirect href="/feeds" />;
   }
 

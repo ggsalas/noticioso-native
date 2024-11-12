@@ -10,9 +10,8 @@ import {
   NativeSyntheticEvent,
 } from "react-native";
 import { useThemeContext } from "@/theme/ThemeProvider";
-import { getFeeds, importFeeds } from "@/domain/getFeeds";
 import { useEffect, useState } from "react";
-import { useAsyncFn } from "@/hooks/useFetch";
+import { useFeedsContext } from "@/providers/FeedsProvider";
 
 export default function Index() {
   const { s, changeFontSize } = useStyles();
@@ -144,21 +143,21 @@ function useStyles() {
 }
 
 function useImportForm() {
-  const { data, loading } = useAsyncFn(getFeeds);
+  const { feeds, loading, importFeeds } = useFeedsContext();
   const [importedFeeds, setImportedFeeds] = useState<string>("");
   const [importError, setImportError] = useState("");
   const [importSuccess, setImportSuccess] = useState(false);
 
   useEffect(() => {
-    if (!loading && data) {
-      setImportedFeeds(JSON.stringify(data));
+    if (!loading && feeds) {
+      setImportedFeeds(JSON.stringify(feeds));
     }
-  }, [loading, data]);
+  }, [loading, feeds]);
 
   const handleOnFeedsImport = async () => {
     try {
-      const success = await importFeeds(importedFeeds);
-      setImportSuccess(success);
+      await importFeeds(importedFeeds);
+      setImportSuccess(true);
     } catch (e) {
       setImportError((e as Error).message);
     }

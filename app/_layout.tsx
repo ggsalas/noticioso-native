@@ -18,6 +18,7 @@ import { useColorScheme } from "react-native";
 import { ThemeProvider as NavigationThemeProvider } from "@react-navigation/native";
 import { DarkTheme, DefaultTheme } from "@/constants/navigationThemes";
 import { ThemeProvider } from "@/theme/ThemeProvider";
+import { FeedsProvider } from "@/providers/FeedsProvider";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -50,10 +51,12 @@ export default function RootLayout() {
       <NavigationThemeProvider
         value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
       >
-        <Stack>
-          <Stack.Screen name="index" options={{ title: "Home" }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
+        <FeedsProvider>
+          <Stack>
+            <Stack.Screen name="index" options={{ title: "Home" }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </FeedsProvider>
       </NavigationThemeProvider>
     </ThemeProvider>
   );

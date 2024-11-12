@@ -1,16 +1,15 @@
 import { Link, Stack, useRouter } from "expo-router";
-import { Pressable, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Pressable, Text, StyleSheet } from "react-native";
 import { useState } from "react";
 import { HandleRouterLinkData } from "@/types";
 import { useThemeContext } from "@/theme/ThemeProvider";
 import { HTMLPagesNav } from "@/components/HTMLPagesNav";
 import { usePreviousRoute } from "@/hooks/usePreviousRoute";
-import { useAsyncFn } from "@/hooks/useFetch";
-import { getFeeds } from "@/domain/getFeeds";
+import { useFeedsContext } from "@/providers/FeedsProvider";
 
 export default function Feeds() {
   const { colors, fonts, sizes, style } = useStyles();
-  const { data, loading, error } = useAsyncFn(getFeeds);
+  const { feeds, loading, error } = useFeedsContext();
   const router = useRouter();
   const [resetNavigation, setResetNavigation] = useState(1);
 
@@ -44,9 +43,9 @@ export default function Feeds() {
   };
 
   const htmlItems =
-    data?.length === 0
+    feeds?.length === 0
       ? '<div class="no-new-conent">No feeds found</div>'
-      : data
+      : feeds
           ?.map(
             ({ name, url }: any) => `
             <div 
@@ -101,11 +100,11 @@ export default function Feeds() {
     );
   }
 
-  if ((!loading && !data) || error) {
+  if ((!loading && !feeds) || error) {
     return (
       <>
         <Text>The app has failed to get the feed list</Text>
-        <Text>content: {JSON.stringify(data, null, 4)}</Text>
+        <Text>content: {JSON.stringify(feeds, null, 4)}</Text>
         <Text>error:{JSON.stringify(error)}</Text>
       </>
     );
