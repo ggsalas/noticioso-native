@@ -1,16 +1,18 @@
-import { Stack, useRouter } from "expo-router";
-import { Text } from "react-native";
-import { getFeeds } from "../../domain/getFeeds";
-import { useEffect, useState } from "react";
-import { Feed, HandleRouterLinkData } from "@/types";
+import { Link, Stack, useRouter } from "expo-router";
+import { Pressable, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useState } from "react";
+import { HandleRouterLinkData } from "@/types";
 import { useThemeContext } from "@/theme/ThemeProvider";
 import { HTMLPagesNav } from "@/components/HTMLPagesNav";
 import { usePreviousRoute } from "@/hooks/usePreviousRoute";
+import { useAsyncFn } from "@/hooks/useFetch";
+import { getFeeds } from "@/domain/getFeeds";
 
 export default function Feeds() {
-  const { colors, fonts, sizes } = useStyles();
-  const { data, loading, error } = useGetFeeds();
+  const { colors, fonts, sizes, style } = useStyles();
+  const { data, loading, error } = useAsyncFn(getFeeds);
   const router = useRouter();
+  const [resetNavigation, setResetNavigation] = useState(1);
 
   const previousRoute = usePreviousRoute();
   const previousArticleUrl = (previousRoute?.params as { feed_url: string })
@@ -24,16 +26,16 @@ export default function Feeds() {
       action: () => null,
     },
     bottom: {
-      label: "Home",
-      action: () => router.back(),
+      label: "Page 1",
+      action: () => setResetNavigation((val) => val + 1),
     },
     first: {
-      label: "Home",
-      action: () => router.back(),
+      label: "Page 1",
+      action: () => setResetNavigation((val) => val + 1),
     },
     last: {
-      label: "Home",
-      action: () => router.back(),
+      label: "Page 1",
+      action: () => setResetNavigation((val) => val + 1),
     },
   };
 
@@ -111,9 +113,21 @@ export default function Feeds() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Feeds" }} />
+      <Stack.Screen
+        options={{
+          title: "Feeds",
+          headerRight: () => (
+            <Link href="/config" asChild>
+              <Pressable style={style.rightButton}>
+                <Text style={style.rightButtonText}>Config</Text>
+              </Pressable>
+            </Link>
+          ),
+        }}
+      />
 
       <HTMLPagesNav
+        key={resetNavigation}
         name="feed"
         html={html}
         actions={actions}
@@ -127,24 +141,12 @@ function useStyles() {
   const { theme } = useThemeContext();
   const { colors, fonts, sizes } = theme;
 
-  return { colors, fonts, sizes };
-}
+  const style = StyleSheet.create({
+    rightButton: {},
+    rightButtonText: {
+      fontSize: fonts.marginP,
+    },
+  });
 
-function useGetFeeds() {
-  const [feeds, setFeeds] = useState<Feed[]>();
-
-  useEffect(() => {
-    async function fn() {
-      const data = await getFeeds();
-      data && setFeeds(data);
-    }
-
-    fn();
-  }, []);
-
-  return {
-    data: feeds,
-    loading: !feeds,
-    error: false,
-  };
+  return { colors, fonts, sizes, style };
 }

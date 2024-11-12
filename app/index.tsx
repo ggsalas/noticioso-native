@@ -1,42 +1,38 @@
-import { Link } from "expo-router";
+import { Link, Redirect, Stack } from "expo-router";
 import { Pressable, Text, View, StyleSheet } from "react-native";
 import { useThemeContext } from "@/theme/ThemeProvider";
+import { useGetFeeds } from "@/hooks/useGetFeeds";
+import { getFeeds } from "@/domain/getFeeds";
+import { useAsyncFn } from "@/hooks/useFetch";
 
 export default function Index() {
-  const { s, changeFontSize } = useStyles();
+  const { style } = useStyles();
+  const { data, loading, error } = useAsyncFn(getFeeds);
+
+  if (!loading && data?.length > 0) {
+    return <Redirect href="/feeds" />;
+  }
 
   return (
-    <View style={s.main}>
-      <View style={s.hero}>
-        <Text style={s.heroText}>Welcome to El Noticioso</Text>
+    <>
+      <Stack.Screen options={{ title: "Home" }} />
 
-        <Link href="/feeds" asChild>
-          <Pressable style={s.button}>
-            <Text style={s.buttonText}>Read</Text>
-          </Pressable>
-        </Link>
-      </View>
+      {error ? (
+        <Text style={style.text}>error</Text>
+      ) : loading ? (
+        <Text style={style.text}>Loading...</Text>
+      ) : (
+        <View style={style.main}>
+          <Text style={style.text}>Hi, this is "El Noticioso"</Text>
 
-      <View style={s.hero}>
-        <Text style={s.heroText}>Configure font size</Text>
-        <Text style={s.testText}>
-          This is a example of text, to adjust the height as you need
-        </Text>
-
-        <Pressable
-          style={s.button}
-          onPress={() => changeFontSize && changeFontSize("increase")}
-        >
-          <Text style={s.buttonText}>Increase</Text>
-        </Pressable>
-        <Pressable
-          style={s.button}
-          onPress={() => changeFontSize && changeFontSize("decrease")}
-        >
-          <Text style={s.buttonText}> Decrease </Text>
-        </Pressable>
-      </View>
-    </View>
+          <Link href="/config" asChild>
+            <Pressable style={style.button}>
+              <Text style={style.buttonText}>Configure to start</Text>
+            </Pressable>
+          </Link>
+        </View>
+      )}
+    </>
   );
 }
 
@@ -46,32 +42,21 @@ function useStyles() {
 
   const style = StyleSheet.create({
     main: {
+      flex: 1,
       display: "flex",
       flexDirection: "column",
-      justifyContent: "flex-start",
+      justifyContent: "center",
+      alignItems: "center",
       gap: sizes.s1,
       padding: sizes.s1,
       backgroundColor: colors.background,
     },
-    hero: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: sizes.s1,
-      borderColor: colors.borderDark,
-      borderRadius: sizes.s0_50,
-      borderWidth: 1,
-      padding: sizes.s2,
-    },
-    heroText: {
+    text: {
       color: colors.text,
       fontSize: fonts.fontSizeH1,
       fontFamily: fonts.fontFamilyBold,
-    },
-    testText: {
-      color: colors.text,
-      fontSize: fonts.fontSizeP,
-      fontFamily: fonts.fontFamilyRegular,
+      marginBottom: sizes.s1 * 4,
+      marginTop: sizes.s1 * -1 * 10,
     },
     button: {
       backgroundColor: colors.text,
@@ -84,5 +69,5 @@ function useStyles() {
     },
   });
 
-  return { s: style, changeFontSize };
+  return { style, changeFontSize };
 }

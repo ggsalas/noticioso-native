@@ -1,146 +1,52 @@
 import { Feed } from "~/types";
 
-const HARDCODED_FEEDS: Feed[] = [
-  {
-    name: "Clarin - Política",
-    url: "https://www.clarin.com/rss/politica/",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "Clarin - Economía",
-    url: "https://www.clarin.com/rss/economia/",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "Clarin - Mundo",
-    url: "https://www.clarin.com/rss/mundo/",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "Clarin - Opinion",
-    url: "https://www.clarin.com/rss/opinion/",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "Clarin - Cultura",
-    url: "https://www.clarin.com/rss/cultura/",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "Clarin - Espectaculos",
-    url: "https://www.clarin.com/rss/espectaculos/",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "La Nacion",
-    url: "https://www.lanacion.com.ar/arc/outboundfeeds/rss/?outputType=xml",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "Perfil - Política",
-    url: "https://www.perfil.com/feed/politica",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "Perfil - Economía",
-    url: "https://www.perfil.com/feed/economia",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "Perfil - Internacionales",
-    url: "https://www.perfil.com/feed/internacional",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "Perfil - Opinión",
-    url: "https://www.perfil.com/feed/opinion",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "Pagina12 - El Pais",
-    url: "https://www.pagina12.com.ar/rss/secciones/el-pais/notas",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "Pagina12 - Economia",
-    url: "https://www.pagina12.com.ar/rss/secciones/economia/notas",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "NYT - Spanish",
-    url: "https://rss.nytimes.com/services/xml/rss/nyt/es.xml",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "NYT - Americas",
-    url: "https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/section/world/americas/rss.xml",
-    oldestArticle: 1,
-    lang: "en",
-  },
-  {
-    name: "ElObs UY - Nacional",
-    url: "https://www.elobservador.com.uy/rss/pages/nacional.xml",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "ElObs UY - Argentina",
-    url: "https://www.elobservador.com.uy/argentina/rss/pages/home.xml",
-    oldestArticle: 1,
-    lang: "es",
-  },
-  {
-    name: "CSS-tricks",
-    url: "https://css-tricks.com/feed/",
-    oldestArticle: 7,
-    lang: "en",
-  },
-  {
-    name: "Javascript Scene",
-    url: "https://medium.com/feed/javascript-scene",
-    oldestArticle: 7,
-    lang: "en",
-  },
-  {
-    name: "Smashing Magazine",
-    url: "https://www.smashingmagazine.com/feed/",
-    oldestArticle: 7,
-    lang: "en",
-  },
-  {
-    name: "Asis",
-    url: "https://jorgeasisdigital.com/feed",
-    oldestArticle: 7,
-    lang: "es",
-  },
-  {
-    name: "Cavallo",
-    url: "https://www.cavallo.com.ar/feed",
-    oldestArticle: 7,
-    lang: "es",
-  },
-];
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export async function getFeeds(): Promise<Array<Feed>> {
-  return HARDCODED_FEEDS;
+const FEEDS_LIST_KEY = "@noticioso-feedList";
+
+export async function getFeeds(): Promise<Array<Feed> | undefined> {
+  const feedsData = await AsyncStorage.getItem(FEEDS_LIST_KEY);
+
+  if (feedsData !== null) {
+    return JSON.parse(feedsData) as Feed[];
+  } else {
+    throw new Error("No feeds found");
+  }
 }
 
 export async function getFeedByUrl(url: string): Promise<Feed | undefined> {
   const feeds = await getFeeds();
 
-  return feeds.find((f) => f.url.includes(url));
+  return feeds?.find((f) => f.url.includes(url));
+}
+
+export async function saveFeeds(feeds: Feed[]) {
+  if (feeds.length > 0) {
+    const feedsData = JSON.stringify(feeds);
+    await AsyncStorage.setItem(FEEDS_LIST_KEY, feedsData);
+  } else {
+    throw new Error("No feeds to save");
+  }
+}
+
+export async function removeAllFeeds() {
+  await AsyncStorage.setItem(FEEDS_LIST_KEY, "");
+}
+
+export async function importFeeds(data: string) {
+  const feeds = JSON.parse(data) as Feed[];
+  const hasItems = feeds.length > 0;
+  const hasValues =
+    feeds[0].name &&
+    feeds[0].url &&
+    feeds[0].oldestArticle >= 1 &&
+    feeds[0].lang;
+
+  if (hasItems && hasValues) {
+    await AsyncStorage.setItem(FEEDS_LIST_KEY, data);
+
+    return true;
+  } else {
+    throw new Error("Data has incorect format");
+  }
 }

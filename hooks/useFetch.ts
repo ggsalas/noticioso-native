@@ -6,10 +6,10 @@ type UseAsyncFnReturn = {
   error: any;
 };
 
-export const useAsyncFn = (fn: any, params: any): UseAsyncFnReturn => {
+export const useAsyncFn = (fn: any, params?: any): UseAsyncFnReturn => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const runAsyncFn = async () => {
@@ -20,7 +20,7 @@ export const useAsyncFn = (fn: any, params: any): UseAsyncFnReturn => {
         setData(data);
         setError(null);
       } catch (error) {
-        setError(error);
+        setError(`${error}`);
       } finally {
         setLoading(false);
       }
