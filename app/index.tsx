@@ -15,21 +15,21 @@ export default function Index() {
     <>
       <Stack.Screen options={{ title: "Home" }} />
 
-      {error ? (
-        <Text style={style.text}>error</Text>
-      ) : loading ? (
-        <Text style={style.text}>Loading...</Text>
-      ) : (
-        <View style={style.main}>
-          <Text style={style.text}>Hi, this is "El Noticioso"</Text>
+      <View style={style.main}>
+        {loading ? (
+          <Text style={style.text}>Loading...</Text>
+        ) : (
+          <>
+            <Text style={style.text}>Hi, this is "El Noticioso"</Text>
 
-          <Link href="/config" asChild>
-            <Pressable style={style.button}>
-              <Text style={style.buttonText}>Configure to start</Text>
-            </Pressable>
-          </Link>
-        </View>
-      )}
+            <Link href="/config" asChild>
+              <Pressable style={style.button}>
+                <Text style={style.buttonText}>Configure to start</Text>
+              </Pressable>
+            </Link>
+          </>
+        )}
+      </View>
     </>
   );
 }
