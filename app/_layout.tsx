@@ -1,3 +1,5 @@
+import "react-native-gesture-handler";
+
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { Stack } from "expo-router";
@@ -55,6 +57,7 @@ export default function RootLayout() {
           <Stack>
             <Stack.Screen name="index" options={{ title: "Home" }} />
             <Stack.Screen name="+not-found" />
+            <Stack.Screen name="config" options={{ headerShown: false }} />
           </Stack>
         </FeedsProvider>
       </NavigationThemeProvider>

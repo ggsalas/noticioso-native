@@ -1,6 +1,6 @@
 import { ReactNode, createContext, useContext, useState } from "react";
 import { useAsyncFn } from "../hooks/useFetch";
-import { getFeeds, importFeeds } from "@/domain/getFeeds";
+import { getFeeds, importFeeds, saveFeeds } from "@/domain/getFeeds";
 import { Feed } from "@/types";
 
 type FeedsProviderProps = { children: ReactNode };
@@ -11,17 +11,22 @@ type FeedsContextType = {
   feeds?: Feed[] | null;
   getFeeds: () => void;
   importFeeds: (feeds: string) => Promise<boolean | undefined>;
+  updateFeeds: (feeds: Feed[]) => Promise<boolean | undefined>;
 };
 
 const FeedsContext = createContext<FeedsContextType>({
   getFeeds: () => null,
   importFeeds: async ([]) => true,
+  updateFeeds: async ([]) => true,
 });
 
 export function FeedsProvider({ children }: FeedsProviderProps) {
-  const { data, loading, error, runFn } = useAsyncFn<Feed[] | undefined>(
-    getFeeds
-  );
+  const {
+    data,
+    loading,
+    error,
+    runFn: refetchFeeds,
+  } = useAsyncFn<Feed[] | undefined>(getFeeds);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const handleImportFeeds = async (feeds: string) => {
@@ -30,12 +35,25 @@ export function FeedsProvider({ children }: FeedsProviderProps) {
       setActionError(null);
 
       if (success) {
-        runFn();
-        console.log("return true");
+        refetchFeeds();
         return true;
       }
     } catch (e) {
       setActionError(`Cannot import feeds ${(e as Error).message}`);
+    }
+  };
+
+  const handleUpdateFeeds = async (feeds: Feed[]) => {
+    try {
+      const success = await saveFeeds(feeds);
+      setActionError(null);
+
+      if (success) {
+        await refetchFeeds();
+        return true;
+      }
+    } catch (e) {
+      setActionError(`Cannot save feeds ${(e as Error).message}`);
     }
   };
 
@@ -45,8 +63,9 @@ export function FeedsProvider({ children }: FeedsProviderProps) {
         feeds: data,
         loading,
         error: error || actionError,
-        getFeeds: runFn,
+        getFeeds: refetchFeeds,
         importFeeds: handleImportFeeds,
+        updateFeeds: handleUpdateFeeds,
       }}
     >
       {children}

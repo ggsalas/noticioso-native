@@ -5,6 +5,7 @@ const tintColorDark = "#fff";
 
 export type Colors = {
   text: string;
+  textGrey: string;
   background: string;
   tint: string;
   icon: string;
@@ -19,6 +20,7 @@ export type Colors = {
 const colors = {
   light: {
     text: "#000000",
+    textGrey: "#999",
     background: "#fff",
     tint: tintColorLight,
     icon: "#687076",
@@ -31,6 +33,7 @@ const colors = {
   },
   dark: {
     text: "#ffffff",
+    textGrey: "#333",
     background: "#000000",
     tint: tintColorDark,
     icon: "#9BA1A6",

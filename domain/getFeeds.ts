@@ -24,6 +24,7 @@ export async function saveFeeds(feeds: Feed[]) {
   if (feeds.length > 0) {
     const feedsData = JSON.stringify(feeds);
     await AsyncStorage.setItem(FEEDS_LIST_KEY, feedsData);
+    return true;
   } else {
     throw new Error("No feeds to save");
   }

@@ -7,6 +7,7 @@ export type Article = ReadabilityArticle;
 export type OldestArticle = 1 | 7;
 
 export interface Feed {
+  id: string;
   name: string;
   url: string;
   oldestArticle: OldestArticle;

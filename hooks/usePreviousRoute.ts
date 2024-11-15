@@ -10,7 +10,8 @@ export function usePreviousRoute() {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("state", (e) => {
-      const currentRoute = e.data.state.routes[e.data.state.index];
+      const currentRoute =
+        e?.data?.state?.routes && e?.data?.state?.routes[e.data.state.index];
 
       if (currentRoute.name !== route.name) {
         setPreviousRoute(currentRoute);
