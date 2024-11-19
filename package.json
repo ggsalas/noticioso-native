@@ -49,7 +49,8 @@
     "react-native-webview": "13.8.6",
     "readability": "^0.1.0",
     "safe-html": "^1.0.0",
-    "undefined": "@expo-google-fonts/jetbrains+mono"
+    "undefined": "@expo-google-fonts/jetbrains+mono",
+    "@react-native-picker/picker": "2.7.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

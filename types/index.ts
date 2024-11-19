@@ -14,6 +14,11 @@ export interface Feed {
   lang: "en" | "es";
 }
 
+export type LocalFeed = Feed & {
+  isOpen?: boolean;
+  isLoading?: boolean;
+};
+
 export type Navigation = {
   nextUrl: string;
   prevUrl: string;
